@@ -1,5 +1,9 @@
 # Dev Log
 
+## 2026-05-14 (continued 2)
+- Set up permanent Cloudflare named tunnel (ID: a3d62123-bdae-42bc-94f8-f759e5f04d44) routing clearams.gusddev.app → localhost:8080 via gusddev.app Cloudflare zone.
+- Updated start_server.sh to auto-download cloudflared to /tmp if missing (survives Codespace restarts), start the tunnel in the background, then launch Flask — single command brings up both server and public URL.
+
 ## 2026-05-14 (continued)
 - Removed all budget modeling/drag-to-adjust UI from the dashboard (Bucket component, adjustments state, Revert buttons, "drag to model" copy).
 - Replaced with GSAP-animated AllocationRing (SVG arc) and BudgetBar (horizontal progress bar) components — staggered entry on school switch.
