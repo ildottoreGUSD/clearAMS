@@ -1,5 +1,8 @@
 # Dev Log
 
+## 2026-05-14 (continued 4)
+- Fixed icon-512.png rendering at natural size (~512px) in nav bar: Tailwind CDN preflight sets `img { height: auto }` which overrides the HTML `height` attribute. Moved height to inline `style` prop (which takes CSS precedence). Nav bars now correctly display icon at 24px.
+
 ## 2026-05-14 (continued 3)
 - Replaced SVG logo with icon-512.png served as a static file; sized to 32px in nav bars, 56px in login card center.
 - Removed massive base64-embedded PNG from dashboard HTML — file size dropped from ~530KB to ~50KB.
