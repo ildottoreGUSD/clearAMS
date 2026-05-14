@@ -1,207 +1,131 @@
 import { useCurrentFrame, useVideoConfig, interpolate, spring, Easing } from "remotion";
-import { STAFFING_COLOR, SUPPLIES_COLOR, fmt$ } from "./data.js";
+import { fmt$ } from "./data.js";
 
-// ── Animated arc (SVG ring) ────────────────────────────────────────────────────
-function Ring({ pct, size = 140, delay = 0 }) {
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const C = {
+  navy:   "#0B2545",
+  ink:    "#0B1B33",
+  blue:   "#1D4ED8",
+  alloc:  "#94A3B8",
+  spent:  "#2563EB",
+  over:   "#DC2626",
+  amber:  "#D97706",
+  green:  "#15803D",
+  muted:  "#64748B",
+  line:   "#E2E8F0",
+  white:  "#FFFFFF",
+};
+
+const YEARS = [
+  { key: "fy2324", label: "FY 2023–24", tag: "Launch Year",     tagFg: "#475569", tagBg: "#F1F5F9" },
+  { key: "fy2425", label: "FY 2024–25", tag: "Growth Year",     tagFg: "#92400E", tagBg: "#FEF3C7" },
+  { key: "fy2526", label: "FY 2025–26", tag: "Live · Current",  tagFg: "#FFFFFF", tagBg: C.blue },
+];
+
+// ── Animated vertical bar ──────────────────────────────────────────────────────
+function AnimBar({ value, maxValue, chartH, color, barW, delay }) {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const r    = (size - 18) / 2;
-  const circ = 2 * Math.PI * r;
 
-  const progress = spring({
+  const prog = spring({
     fps,
     frame: Math.max(0, frame - delay),
-    config: { damping: 20, stiffness: 60, mass: 1 },
-    durationInFrames: 50,
+    config: { damping: 24, stiffness: 40, mass: 1.1 },
+    durationInFrames: 65,
   });
 
-  const clampedPct  = Math.min(pct, 1);
-  const dashOffset  = circ * (1 - progress * clampedPct);
-  const overspent   = pct > 1;
-  const color       = overspent ? "#DC2626" : pct > 0.92 ? "#B45309" : "#15803D";
+  const h = maxValue > 0 ? (value / maxValue) * chartH * prog : 0;
+  const safeH = Math.max(h, value > 0 ? 4 : 0);
 
-  const opacity = interpolate(frame, [delay, delay + 10], [0, 1], { extrapolateRight: "clamp" });
+  const labelOpacity = interpolate(frame, [delay + 50, delay + 65], [0, 1], { extrapolateRight: "clamp" });
+  const labelY = interpolate(frame, [delay + 50, delay + 65], [6, 0], {
+    extrapolateRight: "clamp",
+    easing: Easing.out(Easing.cubic),
+  });
 
   return (
-    <div style={{ position: "relative", width: size, height: size, opacity }}>
-      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#E8EFF7" strokeWidth={14} />
-        <circle
-          cx={size / 2} cy={size / 2} r={r}
-          fill="none" stroke={color} strokeWidth={14}
-          strokeLinecap="round"
-          strokeDasharray={circ}
-          strokeDashoffset={dashOffset}
-        />
-      </svg>
+    <div style={{ width: barW, height: chartH, position: "relative", display: "flex", alignItems: "flex-end" }}>
+      {/* Dollar label floats just above bar top */}
       <div style={{
-        position: "absolute", inset: 0,
-        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        position: "absolute",
+        bottom: safeH + 8, left: -16, right: -16,
+        textAlign: "center",
+        fontSize: 11, fontWeight: 700, fontFamily: "monospace",
+        color: C.ink,
+        opacity: labelOpacity,
+        transform: `translateY(${labelY}px)`,
+        whiteSpace: "nowrap",
       }}>
-        <div style={{ fontSize: 18, fontWeight: 800, color, fontFamily: "monospace", lineHeight: 1 }}>
-          {(Math.min(pct, 9.99) * 100).toFixed(1)}%
-        </div>
-        <div style={{ fontSize: 10, color: "#94A3B8", marginTop: 3, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-          used
-        </div>
+        {fmt$(value)}
       </div>
+      {/* Bar body */}
+      <div style={{
+        width: "100%",
+        height: safeH,
+        background: color,
+        borderRadius: "5px 5px 0 0",
+      }} />
     </div>
   );
 }
 
-// ── Animated horizontal bar ────────────────────────────────────────────────────
-function Bar({ label, share, budget, expended, accent, delay = 0 }) {
+// ── Explanatory callout card ───────────────────────────────────────────────────
+function CalloutCard({ label, tag, tagFg, tagBg, headline, body, accent, delay }) {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const pct = budget > 0 ? Math.min(expended / budget, 1) : 0;
-
-  const progress = spring({
-    fps,
-    frame: Math.max(0, frame - delay),
-    config: { damping: 22, stiffness: 55, mass: 0.9 },
-    durationInFrames: 55,
-  });
-
-  const barWidth  = `${progress * pct * 100}%`;
-  const remaining = budget - expended;
-  const over      = expended > budget;
-
-  const labelOpacity = interpolate(frame, [delay, delay + 12], [0, 1], { extrapolateRight: "clamp" });
-  const labelY       = interpolate(frame, [delay, delay + 12], [6, 0],  { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-
-  return (
-    <div style={{ marginBottom: 22, opacity: labelOpacity, transform: `translateY(${labelY}px)` }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ width: 9, height: 9, borderRadius: "50%", background: accent, display: "inline-block" }} />
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "#1B2E4F" }}>
-            {label}
-          </span>
-          <span style={{ fontSize: 10, color: "#94A3B8", background: "#EEF1F5", borderRadius: 4, padding: "1px 6px", fontWeight: 600 }}>
-            {share}%
-          </span>
-        </div>
-        <span style={{ fontSize: 12, fontWeight: 700, fontFamily: "monospace", color: "#0B1B33" }}>
-          {fmt$(budget)}
-        </span>
-      </div>
-
-      <div style={{ height: 12, background: "#EDF0F5", borderRadius: 999, overflow: "hidden", border: "1px solid #C8D3DF", position: "relative" }}>
-        <div style={{
-          position: "absolute", top: 0, bottom: 0, left: 0,
-          width: barWidth,
-          background: over ? "#DC2626" : accent,
-          borderRadius: 999,
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,.4)",
-        }} />
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6 }}>
-        <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 600, color: over ? "#B91C1C" : "#0B1B33" }}>
-          {fmt$(expended)} <span style={{ fontWeight: 400, color: "#94A3B8" }}>expended</span>
-        </span>
-        <span style={{ fontSize: 11, fontFamily: "monospace", fontWeight: 600,
-          color: remaining < 0 ? "#B91C1C" : remaining < budget * 0.08 ? "#B45309" : "#1B2E4F" }}>
-          {remaining >= 0 ? "" : "−"}{fmt$(Math.abs(remaining))} <span style={{ fontWeight: 400, color: "#94A3B8" }}>{remaining >= 0 ? "left" : "over"}</span>
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// ── Animated number counter ────────────────────────────────────────────────────
-function CountUp({ value, delay = 0, style }) {
-  const frame = useCurrentFrame();
-  const p = interpolate(frame, [delay, delay + 45], [0, 1], {
+  const opacity = interpolate(frame, [delay, delay + 20], [0, 1], { extrapolateRight: "clamp" });
+  const y = interpolate(frame, [delay, delay + 20], [16, 0], {
     extrapolateRight: "clamp",
     easing: Easing.out(Easing.cubic),
   });
-  const displayed = Math.round(value * p);
-  const opacity   = interpolate(frame, [delay, delay + 10], [0, 1], { extrapolateRight: "clamp" });
-  return <span style={{ ...style, opacity }}>{fmt$(displayed)}</span>;
-}
-
-// ── Year card ──────────────────────────────────────────────────────────────────
-function YearCard({ yearData, label, status, cardDelay, cardWidth }) {
-  const frame = useCurrentFrame();
-  const { allocation, staffingBudget, suppliesBudget, totalExp } = yearData;
-  const staffExp  = Math.round(totalExp * 0.80);
-  const suppExp   = totalExp - staffExp;
-  const remaining = allocation - totalExp;
-  const usagePct  = allocation > 0 ? totalExp / allocation : 0;
-  const isCurrent = status === "current";
-
-  const cardY = interpolate(frame, [cardDelay, cardDelay + 20], [40, 0], {
-    extrapolateRight: "clamp",
-    easing: Easing.out(Easing.cubic),
-  });
-  const cardOpacity = interpolate(frame, [cardDelay, cardDelay + 20], [0, 1], { extrapolateRight: "clamp" });
-
-  const badgeColor = isCurrent ? "#1D4ED8" : "#15803D";
-  const badgeBg    = isCurrent ? "#EEF2FF" : "#ECFDF5";
 
   return (
     <div style={{
-      width: cardWidth, opacity: cardOpacity, transform: `translateY(${cardY}px)`,
-      display: "flex", flexDirection: "column", gap: 12,
+      flex: 1,
+      opacity,
+      transform: `translateY(${y}px)`,
+      background: C.white,
+      border: `2px solid ${accent}`,
+      borderRadius: 16,
+      padding: "18px 20px",
+      boxShadow: "0 6px 28px rgba(11,27,51,0.11)",
+      display: "flex",
+      flexDirection: "column",
+      gap: 0,
     }}>
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <div style={{ fontSize: 16, fontWeight: 800, color: "#0B1B33", letterSpacing: "-0.015em" }}>{label}</div>
-          <div style={{ fontSize: 10, color: "#94A3B8", marginTop: 5, fontFamily: "monospace" }}>Prop 28 Allocation</div>
-        </div>
-        <div style={{
-          display: "flex", alignItems: "center", gap: 6,
-          background: badgeBg, color: badgeColor, borderRadius: 999,
-          padding: "5px 12px", fontSize: 10, fontWeight: 700,
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: badgeColor, display: "inline-block" }} />
-          {isCurrent ? "Live" : "Final"}
-        </div>
+      {/* Accent bar */}
+      <div style={{ width: 28, height: 4, background: accent, borderRadius: 2, marginBottom: 10 }} />
+      {/* Year + tag row */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+        <span style={{ fontSize: 13, fontWeight: 800, color: C.ink, letterSpacing: "-0.01em" }}>{label}</span>
+        <span style={{
+          fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
+          color: tagFg, background: tagBg, padding: "3px 9px", borderRadius: 99,
+        }}>{tag}</span>
       </div>
-
-      {/* Allocation + Ring */}
-      <div style={{
-        background: "white", borderRadius: 14, border: "1px solid #C8D3DF",
-        padding: "18px 20px", display: "flex", alignItems: "center", gap: 16,
-      }}>
-        <Ring pct={usagePct} size={110} delay={cardDelay + 10} />
-        <div>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 6 }}>
-            Starting Allocation
-          </div>
-          <CountUp value={allocation} delay={cardDelay + 8} style={{ fontSize: 26, fontWeight: 800, fontFamily: "serif", color: "#0B1B33", letterSpacing: "-0.02em" }} />
-          <div style={{ fontSize: 11, marginTop: 6, color: "#94A3B8" }}>
-            <span style={{ fontWeight: 700, color: usagePct > 1 ? "#B91C1C" : usagePct > 0.92 ? "#B45309" : "#1B2E4F" }}>
-              {(Math.min(usagePct, 9.99) * 100).toFixed(1)}%
-            </span> utilized
-          </div>
+      {/* Headline stat */}
+      {headline && (
+        <div style={{ fontSize: 11, fontWeight: 700, color: accent, letterSpacing: "0.02em", marginBottom: 6 }}>
+          {headline}
         </div>
+      )}
+      {/* Body text */}
+      <div style={{ fontSize: 12, color: "#334155", lineHeight: 1.62 }}>
+        {body}
       </div>
+    </div>
+  );
+}
 
-      {/* Budget bars */}
-      <div style={{ background: "white", borderRadius: 14, border: "1px solid #C8D3DF", padding: "18px 20px" }}>
-        <Bar label="Staffing" share={80} budget={staffingBudget} expended={staffExp}
-          accent={STAFFING_COLOR} delay={cardDelay + 18} />
-        <Bar label="Supplies" share={20} budget={suppliesBudget} expended={suppExp}
-          accent={SUPPLIES_COLOR} delay={cardDelay + 28} />
-      </div>
-
-      {/* Totals */}
-      <div style={{ background: "white", borderRadius: 14, border: "1px solid #C8D3DF", overflow: "hidden" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
-          <div style={{ padding: "14px 18px" }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 5 }}>Total Expended</div>
-            <CountUp value={totalExp} delay={cardDelay + 22} style={{ fontSize: 16, fontWeight: 800, fontFamily: "monospace", color: "#0B1B33" }} />
-          </div>
-          <div style={{ padding: "14px 18px", borderLeft: "1px solid #C8D3DF" }}>
-            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 5 }}>Remaining</div>
-            <CountUp value={Math.abs(remaining)} delay={cardDelay + 26}
-              style={{ fontSize: 16, fontWeight: 800, fontFamily: "monospace",
-                color: remaining < 0 ? "#B91C1C" : remaining < allocation * 0.05 ? "#B45309" : "#15803D" }} />
-          </div>
-        </div>
+// ── Horizontal grid line ───────────────────────────────────────────────────────
+function GridLine({ y, label, delay }) {
+  const frame = useCurrentFrame();
+  const opacity = interpolate(frame, [delay, delay + 14], [0, 1], { extrapolateRight: "clamp" });
+  return (
+    <div style={{ position: "absolute", left: 0, right: 0, top: y, opacity }}>
+      <div style={{ position: "absolute", left: 0, right: 0, borderTop: `1px dashed ${C.line}` }} />
+      <div style={{ position: "absolute", right: "100%", paddingRight: 10, top: -9,
+        fontSize: 10, color: C.muted, fontFamily: "monospace", whiteSpace: "nowrap" }}>
+        {label}
       </div>
     </div>
   );
@@ -212,60 +136,243 @@ export function BudgetComposition({ school }) {
   const frame = useCurrentFrame();
   const { width, height } = useVideoConfig();
 
-  const titleY = interpolate(frame, [0, 18], [-30, 0], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
-  const titleOpacity = interpolate(frame, [0, 18], [0, 1], { extrapolateRight: "clamp" });
+  // Layout constants
+  const pad      = 80;
+  const titleH   = 92;
+  const chartH   = 280;
+  const axisY    = titleH + chartH + 14;
+  const labelH   = 70;
+  const cardTop  = axisY + labelH + 18;
+  const cardH    = height - cardTop - 28;
+  const chartW   = width - pad * 2;
+  const groupW   = chartW / 3;
+  const barW     = 54;
+  const barGap   = 12;
 
-  const pad      = 60;
-  const cardGap  = 28;
-  const cardW    = Math.floor((width - pad * 2 - cardGap * 2) / 3);
-  const YEARS_LIST = [
-    { key: "fy2526", label: "FY 2025–26", status: "current" },
-    { key: "fy2425", label: "FY 2024–25", status: "final"   },
-    { key: "fy2324", label: "FY 2023–24", status: "final"   },
-  ];
+  // Y-axis scale
+  const allAmounts = YEARS.flatMap(yr => [
+    school[yr.key].allocation,
+    school[yr.key].totalExp,
+  ]).filter(v => v > 0);
+  const rawMax = Math.max(...allAmounts, 1);
+  const maxVal = rawMax * 1.20;
+
+  // Grid lines at 25/50/75/100% of raw max
+  const gridFracs = [0.25, 0.5, 0.75, 1.0];
+  const gridLines = gridFracs.map(f => ({
+    value: rawMax * f,
+    yPx: chartH - (rawMax * f / maxVal) * chartH,
+  }));
+
+  // Per-year derived data
+  const yearItems = YEARS.map((yr, i) => {
+    const d = school[yr.key];
+    const isOver  = d.totalExp > d.allocation && d.totalExp > 0;
+    const isAmber = !isOver && d.totalExp > d.allocation * 0.88 && d.totalExp > 0;
+    const pct     = d.allocation > 0 && d.totalExp > 0
+      ? (d.totalExp / d.allocation * 100).toFixed(1) : "0.0";
+    return { ...yr, d, isOver, isAmber, pct, i };
+  });
+
+  // Callout content generator
+  function calloutContent(item) {
+    const { key, d, isOver, pct } = item;
+    const pctN = parseFloat(pct);
+
+    if (key === "fy2324") {
+      if (d.totalExp === 0 || pctN < 0.1) {
+        return {
+          headline: "No expenditure recorded",
+          body: `FY 2023–24 was Prop 28's launch year. Programs were newly established and funds were carried forward, establishing the baseline allocation of ${fmt$(d.allocation)}.`,
+          accent: C.muted,
+        };
+      }
+      return {
+        headline: `${pct}% utilized · ${fmt$(d.totalExp)} expended`,
+        body: `${fmt$(d.allocation)} was allocated for the launch year. Initial expenditures covered early staffing contracts and first-year supply purchases.`,
+        accent: pctN > 88 ? C.amber : C.muted,
+      };
+    }
+
+    if (key === "fy2425") {
+      if (isOver) {
+        return {
+          headline: `Over budget by ${fmt$(d.totalExp - d.allocation)}`,
+          body: `Expenditure of ${fmt$(d.totalExp)} exceeded the ${fmt$(d.allocation)} annual allocation. The school drew on prior-year reserves or supplemental sources to cover the overage.`,
+          accent: C.over,
+        };
+      }
+      return {
+        headline: `${pct}% utilized · ${fmt$(d.totalExp)} expended`,
+        body: `Spending grew significantly from the prior year as arts programs reached full operation — staffing contracts expanded and supply procurement accelerated. ${fmt$(d.allocation - d.totalExp)} remained unspent.`,
+        accent: pctN > 88 ? C.amber : C.blue,
+      };
+    }
+
+    // fy2526
+    if (isOver) {
+      return {
+        headline: `Over budget by ${fmt$(d.totalExp - d.allocation)}`,
+        body: `Current-year spending of ${fmt$(d.totalExp)} has already exceeded the ${fmt$(d.allocation)} allocation, reflecting strong program activity through May 2026.`,
+        accent: C.over,
+      };
+    }
+    if (pctN < 10) {
+      return {
+        headline: `${pct}% utilized so far`,
+        body: `Only ${fmt$(d.totalExp)} of the ${fmt$(d.allocation)} allocation has been expended through May 2026. Significant funds remain available for staffing and supplies in the second half of the fiscal year.`,
+        accent: C.blue,
+      };
+    }
+    return {
+      headline: `${pct}% utilized · ${fmt$(d.totalExp)} expended`,
+      body: `${fmt$(d.allocation - d.totalExp)} remains available through June 2026. ${pctN > 80 ? "The budget is nearing full utilization — strong arts program activity this year." : "Funds continue to be deployed for staffing and instructional supplies."}`,
+      accent: C.blue,
+    };
+  }
+
+  // Global animation values
+  const titleOpacity = interpolate(frame, [0, 18], [0, 1], { extrapolateRight: "clamp" });
+  const titleY       = interpolate(frame, [0, 18], [-22, 0], { extrapolateRight: "clamp", easing: Easing.out(Easing.cubic) });
+  const legendOpacity= interpolate(frame, [10, 26], [0, 1], { extrapolateRight: "clamp" });
+  const axisOpacity  = interpolate(frame, [14, 28], [0, 1], { extrapolateRight: "clamp" });
+  const footerOpacity= interpolate(frame, [55, 72], [0, 1], { extrapolateRight: "clamp" });
 
   return (
     <div style={{
       width, height,
-      background: "linear-gradient(160deg, #F8FAFF 0%, #FFFFFF 60%)",
+      background: "linear-gradient(148deg, #EEF2FF 0%, #F5F8FF 45%, #FAFBFF 100%)",
       fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif",
-      padding: pad,
-      display: "flex", flexDirection: "column", gap: 32,
+      overflow: "hidden",
+      position: "relative",
     }}>
-      {/* Title */}
-      <div style={{ opacity: titleOpacity, transform: `translateY(${titleY}px)` }}>
-        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#94A3B8", marginBottom: 6 }}>
-          Glendale Unified School District · Prop 28 Arts &amp; Music
+
+      {/* ── Title ── */}
+      <div style={{
+        position: "absolute", top: 24, left: pad + 40, right: pad,
+        display: "flex", justifyContent: "space-between", alignItems: "flex-end",
+        opacity: titleOpacity, transform: `translateY(${titleY}px)`,
+      }}>
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: C.muted, marginBottom: 5 }}>
+            Glendale Unified · Prop 28 Arts &amp; Music in Schools
+          </div>
+          <div style={{ fontSize: 34, fontWeight: 800, color: C.navy, letterSpacing: "-0.025em", lineHeight: 1 }}>
+            {school.name}
+          </div>
         </div>
-        <div style={{ fontSize: 36, fontWeight: 800, color: "#0B1B33", letterSpacing: "-0.025em", lineHeight: 1 }}>
-          {school.name}
-        </div>
-        <div style={{ fontSize: 13, color: "#64748B", marginTop: 8 }}>
-          Three-year Prop 28 allocation overview · 80% staffing · 20% supplies
+        <div style={{ fontSize: 12, color: C.muted, textAlign: "right", lineHeight: 1.6 }}>
+          Allocation vs. Expenditure<br />
+          <span style={{ fontSize: 10.5 }}>Three-Year Overview · FY 2023–2026</span>
         </div>
       </div>
 
-      {/* Year cards */}
-      <div style={{ display: "flex", gap: cardGap, flex: 1, alignItems: "flex-start" }}>
-        {YEARS_LIST.map((yr, i) => (
-          <YearCard
-            key={yr.key}
-            yearData={school[yr.key]}
-            label={yr.label}
-            status={yr.status}
-            cardDelay={6 + i * 8}
-            cardWidth={cardW}
-          />
+      {/* ── Legend ── */}
+      <div style={{
+        position: "absolute", top: 80, right: pad,
+        display: "flex", gap: 18, alignItems: "center",
+        opacity: legendOpacity,
+      }}>
+        {[
+          { color: C.alloc, label: "Allocated" },
+          { color: C.spent, label: "Expended" },
+          { color: C.over,  label: "Over Budget" },
+        ].map(({ color, label }) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+            <div style={{ width: 12, height: 12, borderRadius: 3, background: color }} />
+            <span style={{ fontSize: 11, color: C.muted, fontWeight: 600 }}>{label}</span>
+          </div>
         ))}
       </div>
 
-      {/* Footer */}
+      {/* ── Baseline axis ── */}
       <div style={{
-        fontSize: 10, color: "#CBD5E1", display: "flex", justifyContent: "space-between",
-        opacity: interpolate(frame, [20, 30], [0, 1], { extrapolateRight: "clamp" }),
+        position: "absolute", left: pad + 40, right: pad, top: axisY,
+        height: 2, background: C.line, opacity: axisOpacity,
+      }} />
+
+      {/* ── Y-axis grid lines ── */}
+      <div style={{ position: "absolute", left: pad + 40, right: pad, top: titleH + 14 }}>
+        {gridLines.map(({ value, yPx }, idx) => (
+          <GridLine key={idx} y={yPx} label={fmt$(value)} delay={16 + idx * 5} />
+        ))}
+      </div>
+
+      {/* ── Bar groups ── */}
+      {yearItems.map((item) => {
+        const { d, isOver, isAmber, i } = item;
+        const barDelay   = 18 + i * 22;
+        const spentColor = isOver ? C.over : isAmber ? C.amber : C.spent;
+        const gX         = pad + 40 + i * groupW;
+        const barsX      = gX + (groupW - barW * 2 - barGap) / 2;
+        const lblFade    = interpolate(frame, [barDelay + 38, barDelay + 54], [0, 1], { extrapolateRight: "clamp" });
+
+        return (
+          <div key={item.key}>
+            {/* Allocation bar */}
+            <div style={{ position: "absolute", left: barsX, top: titleH + 14 }}>
+              <AnimBar value={d.allocation} maxValue={maxVal} chartH={chartH}
+                color={C.alloc} barW={barW} delay={barDelay} />
+            </div>
+            {/* Expended bar */}
+            <div style={{ position: "absolute", left: barsX + barW + barGap, top: titleH + 14 }}>
+              <AnimBar value={d.totalExp} maxValue={maxVal} chartH={chartH}
+                color={spentColor} barW={barW} delay={barDelay + 14} />
+            </div>
+            {/* Year label + tag below axis */}
+            <div style={{
+              position: "absolute",
+              left: gX, width: groupW,
+              top: axisY + 10,
+              textAlign: "center",
+              opacity: lblFade,
+            }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: C.navy, marginBottom: 6 }}>
+                {item.label}
+              </div>
+              <div style={{
+                display: "inline-block",
+                fontSize: 9, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase",
+                color: item.tagFg, background: item.tagBg, padding: "3px 10px", borderRadius: 99,
+              }}>
+                {item.tag}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* ── Callout cards ── */}
+      <div style={{
+        position: "absolute", left: pad, right: pad, top: cardTop, height: cardH,
+        display: "flex", gap: 16,
+      }}>
+        {yearItems.map((item) => {
+          const content = calloutContent(item);
+          return (
+            <CalloutCard
+              key={item.key}
+              label={item.label}
+              tag={item.tag}
+              tagFg={item.tagFg}
+              tagBg={item.tagBg}
+              headline={content.headline}
+              body={content.body}
+              accent={content.accent}
+              delay={82 + item.i * 22}
+            />
+          );
+        })}
+      </div>
+
+      {/* ── Footer ── */}
+      <div style={{
+        position: "absolute", bottom: 14, left: pad, right: pad,
+        display: "flex", justifyContent: "space-between",
+        fontSize: 10, color: "#CBD5E1", opacity: footerOpacity,
       }}>
         <span>ClearAMS · clearams.gusddev.app</span>
-        <span>Data sourced from official Prop 28 allocation spreadsheets</span>
+        <span>Figures accurate as of May 1, 2026 · Official Prop 28 Allocation Spreadsheet · GUSD VAPA</span>
       </div>
     </div>
   );

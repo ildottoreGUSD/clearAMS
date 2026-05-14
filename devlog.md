@@ -1,5 +1,11 @@
 # Dev Log
 
+## 2026-05-14 (continued 6)
+- Rebuilt Remotion composition: replaced looping year-card animation with a comparative grouped bar chart (Allocation vs. Expended for all three fiscal years). Bars animate in with spring physics staggered by year group. Four horizontal grid lines with Y-axis dollar labels give scale context.
+- Added three explanatory callout cards below the chart — one per year — that pop in after their bars animate. Cards are data-driven: auto-detect zero-spending launch years, over-budget conditions, and current-year utilization status with contextual language.
+- Extended composition duration from 90 → 180 frames (6 seconds at 30fps); added `acknowledgeRemotionLicense` prop to suppress console warning.
+- Increased nav bar icon from 24px → 32px after user feedback that 24px was too small.
+
 ## 2026-05-14 (continued 5)
 - Fixed GSAP CDN block: removed SRI `integrity` attribute from the GSAP script tag (cloudflare CDN had updated the file, causing hash mismatch and browser block). Dashboard ring/bar animations now load correctly.
 - Fixed Remotion player crash (`TypeError: e is not a function`): `Easing.expo` is undefined in Remotion 4.0.461; replaced with `Easing.cubic` in CountUp component's interpolate call. Rebuilt player dist.

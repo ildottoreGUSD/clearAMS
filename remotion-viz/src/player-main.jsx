@@ -20,7 +20,8 @@ function PlayerApp() {
     <Player
       component={BudgetComposition}
       inputProps={{ school }}
-      durationInFrames={90}
+      durationInFrames={180}
+      acknowledgeRemotionLicense
       fps={30}
       compositionWidth={1280}
       compositionHeight={720}
