@@ -1,5 +1,10 @@
 # Dev Log
 
+## 2026-05-14 (continued)
+- Removed all budget modeling/drag-to-adjust UI from the dashboard (Bucket component, adjustments state, Revert buttons, "drag to model" copy).
+- Replaced with GSAP-animated AllocationRing (SVG arc) and BudgetBar (horizontal progress bar) components — staggered entry on school switch.
+- Created remotion-viz/ subfolder: full Remotion 4 project with BudgetComposition, one 1280×720 composition per school, featuring spring-physics bars, animated SVG arcs, count-up numbers, and staggered card entries. Run `npm start` in remotion-viz/ to launch Remotion Studio; `npm run render` to export MP4.
+
 ## 2026-05-14
 - Migrated auth from hardcoded USERS dict to Flask backend (server.py) with bcrypt password hashing and session tokens.
 - Added admin panel (admin.html) with key-gated access for managing user accounts.
