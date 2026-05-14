@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ClearAMS — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:     #0B1B33;
+    --muted:   #64748B;
+    --line:    #B8C8DC;
+    --surface: #F4F6FA;
+    --card:    #FFFFFF;
+    --navy:    #0B2545;
+    --blue:    #1D4ED8;
+    --green:   #15803D;
+    --green-s: #ECFDF5;
+    --red:     #B91C1C;
+    --red-s:   #FEF2F2;
+    --amber:   #B45309;
+    --amber-s: #FFFBEB;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; }
+  html, body {
+    font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+    background: var(--surface); color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    font-size: 14px;
+  }
+
+  /* Layout */
+  .topbar {
+    background: var(--navy); color: white;
+    padding: 0 32px; height: 54px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-title { font-weight: 700; font-size: 15px; letter-spacing: -.01em; }
+  .topbar-sub   { font-size: 12px; opacity: .6; margin-top: 1px; }
+  .key-badge {
+    font-family: "Geist Mono", monospace; font-size: 11px;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+    padding: 4px 10px; border-radius: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .key-badge span { opacity: .6; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+  .grid-2    { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* Cards */
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .card-header { padding: 16px 20px; border-bottom: 1px solid var(--line); }
+  .card-title  { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .card-sub    { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .card-body   { padding: 20px; }
+
+  /* Form */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .06em; }
+  .field input, .field select {
+    width: 100%; padding: 9px 11px; font-size: 13px; font-family: inherit;
+    border: 1px solid var(--line); border-radius: 7px; background: var(--surface);
+    color: var(--ink); outline: none; transition: border-color .15s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--blue); background: white; }
+
+  /* School picker */
+  .school-picker { border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+  .school-pick-ctrl {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 11px; background: #F8FAFC; border-bottom: 1px solid var(--line);
+    font-size: 12px; font-weight: 600; color: var(--ink); cursor: pointer;
+    text-transform: none; letter-spacing: normal; margin: 0;
+    user-select: none;
+  }
+  .school-pick-ctrl input { width: auto; padding: 0; border: none; background: none; cursor: pointer; }
+  .school-list { max-height: 190px; overflow-y: auto; padding: 4px 0; }
+  .school-list label {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 11px; font-size: 13px; cursor: pointer;
+    color: var(--ink); text-transform: none; letter-spacing: normal;
+    font-weight: normal; margin: 0;
+  }
+  .school-list label:hover { background: #F0F4FA; }
+  .school-list input[type=checkbox] { width: auto; padding: 0; border: none; background: none; cursor: pointer; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 500; font-family: inherit;
+    padding: 8px 16px; border-radius: 7px; border: none; cursor: pointer;
+    transition: background .12s; line-height: 1;
+  }
+  .btn-primary   { background: var(--navy); color: white; }
+  .btn-primary:hover { background: #13315C; }
+  .btn-danger    { background: var(--red-s); color: var(--red); border: 1px solid #FECACA; }
+  .btn-danger:hover  { background: #FEE2E2; }
+  .btn-amber     { background: var(--amber-s); color: var(--amber); border: 1px solid #FDE68A; }
+  .btn-amber:hover   { background: #FEF3C7; }
+  .btn:disabled  { opacity: .45; cursor: not-allowed; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+  /* Table */
+  .users-table { width: 100%; border-collapse: collapse; }
+  .users-table th {
+    text-align: left; font-size: 10.5px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--muted); padding: 10px 16px;
+    background: var(--surface); border-bottom: 1px solid var(--line);
+  }
+  .users-table td { padding: 11px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .users-table tr:last-child td { border-bottom: none; }
+  .users-table tr:hover td { background: #FAFBFD; }
+
+  .mono { font-family: "Geist Mono", monospace; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+  }
+  .badge-amber { background: var(--amber-s); color: var(--amber); }
+  .badge-green { background: var(--green-s); color: var(--green); }
+
+  /* Toast */
+  .toast-wrap {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; gap: 8px; z-index: 999;
+    pointer-events: none;
+  }
+  .toast {
+    padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    box-shadow: 0 4px 18px rgba(0,0,0,.14); pointer-events: auto;
+    animation: toastIn .2s ease both;
+  }
+  .toast-ok  { background: var(--green-s); color: var(--green); border: 1px solid #A7F3D0; }
+  .toast-err { background: var(--red-s);   color: var(--red);   border: 1px solid #FECACA; }
+  @keyframes toastIn { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:none } }
+
+  /* Auth gate */
+  .auth-gate {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--surface);
+  }
+  .auth-box {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 36px 40px; width: 100%; max-width: 400px; box-shadow: 0 4px 24px rgba(11,27,51,.07);
+  }
+  .auth-box h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .auth-box p  { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+
+  #app { display: none; }
+</style>
+</head>
+<body>
+
+<!-- Auth gate -->
+<div id="auth-gate" class="auth-gate">
+  <div class="auth-box">
+    <h1>ClearAMS Admin</h1>
+    <p>Enter your admin key to continue.</p>
+    <div class="field">
+      <label>Admin key</label>
+      <input type="password" id="key-input" placeholder="••••••••••••••••" autocomplete="off" />
+    </div>
+    <div id="auth-err" style="font-size:13px;color:var(--red);margin-bottom:12px;display:none"></div>
+    <button class="btn btn-primary" onclick="authenticate()" style="width:100%">Unlock</button>
+  </div>
+</div>
+
+<!-- Main app (hidden until auth) -->
+<div id="app">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">ClearAMS — Admin Panel</div>
+      <div class="topbar-sub">Prop 28 · Glendale Unified</div>
+    </div>
+    <div class="key-badge">
+      <span>Key</span>
+      <span id="key-display" style="opacity:1"></span>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="grid-2">
+
+      <!-- Add user -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Add / Update User</div>
+          <div class="card-sub">Creates the account or overwrites an existing one. User must reset password on first login.</div>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="add-email" placeholder="principal@gusd.net" />
+          </div>
+          <div class="field">
+            <label>Initial Password</label>
+            <input type="text" id="add-password" placeholder="Temporary password (min 6 chars)" />
+          </div>
+          <div class="field">
+            <label>Schools</label>
+            <div class="school-picker">
+              <label class="school-pick-ctrl">
+                <input type="checkbox" id="school-all" onchange="toggleAllSchools(this.checked)" />
+                Select all schools
+              </label>
+              <div class="school-list">
+                <label><input type="checkbox" name="school" value="hoover" /> Hoover (HS)</label>
+                <label><input type="checkbox" name="school" value="crescenta" /> CVHS (HS)</label>
+                <label><input type="checkbox" name="school" value="glendale" /> Glendale (HS)</label>
+                <label><input type="checkbox" name="school" value="clark" /> Clark (HS)</label>
+                <label><input type="checkbox" name="school" value="daily" /> Daily (HS)</label>
+                <label><input type="checkbox" name="school" value="roosevelt" /> Roosevelt (MS)</label>
+                <label><input type="checkbox" name="school" value="rosemont" /> Rosemont (MS)</label>
+                <label><input type="checkbox" name="school" value="toll" /> Toll (MS)</label>
+                <label><input type="checkbox" name="school" value="wilson" /> Wilson (MS)</label>
+                <label><input type="checkbox" name="school" value="balboa" /> Balboa (ES)</label>
+                <label><input type="checkbox" name="school" value="cerritos" /> Cerritos (ES)</label>
+                <label><input type="checkbox" name="school" value="columbus" /> Columbus (ES)</label>
+                <label><input type="checkbox" name="school" value="dunsmore" /> Dunsmore (ES)</label>
+                <label><input type="checkbox" name="school" value="edison" /> Edison (ES)</label>
+                <label><input type="checkbox" name="school" value="franklin" /> Franklin (ES)</label>
+                <label><input type="checkbox" name="school" value="fremont" /> Fremont (ES)</label>
+                <label><input type="checkbox" name="school" value="glenoaks" /> Glenoaks (ES)</label>
+                <label><input type="checkbox" name="school" value="jefferson" /> Jefferson (ES)</label>
+                <label><input type="checkbox" name="school" value="keppel" /> Keppel (ES)</label>
+                <label><input type="checkbox" name="school" value="lacrescenta" /> La Crescenta (ES)</label>
+                <label><input type="checkbox" name="school" value="lincoln" /> Lincoln (ES)</label>
+                <label><input type="checkbox" name="school" value="mann" /> Mann (ES)</label>
+                <label><input type="checkbox" name="school" value="marshall" /> Marshall (ES)</label>
+                <label><input type="checkbox" name="school" value="montevista" /> Monte Vista (ES)</label>
+                <label><input type="checkbox" name="school" value="mountainave" /> Mountain Ave (ES)</label>
+                <label><input type="checkbox" name="school" value="muir" /> Muir (ES)</label>
+                <label><input type="checkbox" name="school" value="valleyview" /> Valley View (ES)</label>
+                <label><input type="checkbox" name="school" value="verdugowoodlands" /> Verdugo Woodlands (ES)</label>
+                <label><input type="checkbox" name="school" value="rdwhite" /> R.D. White (ES)</label>
+                <label><input type="checkbox" name="school" value="cloud" /> Cloud Preschool</label>
+                <label><input type="checkbox" name="school" value="verdugoacademy" /> Verdugo Academy</label>
+                <label><input type="checkbox" name="school" value="jewelcity" /> Jewel City</label>
+                <label><input type="checkbox" name="school" value="pacificave" /> Pacific Avenue Education Center</label>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="addUser()" style="width:100%">Add / Update User</button>
+        </div>
+      </div>
+
+      <!-- Reset password -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Reset Password</div>
+          <div class="card-sub">Sets a new temporary password. User will be required to reset on next login.</div>
+        </div>
+        <div class="card-body">
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="reset-email" placeholder="principal@gusd.net" />
+          </div>
+          <div class="field">
+            <label>New Temporary Password</label>
+            <input type="text" id="reset-password" placeholder="Temporary password (min 6 chars)" />
+          </div>
+          <button class="btn btn-amber" onclick="resetPassword()" style="width:100%;margin-top:8px">Reset Password</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Users table -->
+    <div class="card" style="margin-top:24px">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="card-title">All Users</div>
+          <div class="card-sub" id="user-count">Loading…</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="loadUsers()">Refresh</button>
+      </div>
+      <div id="users-container">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>School</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+let ADMIN_KEY = "";
+
+// ── Auth gate ──────────────────────────────────────────────────────────────────
+document.getElementById("key-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") authenticate();
+});
+
+async function authenticate() {
+  const key = document.getElementById("key-input").value.trim();
+  if (!key) return;
+
+  const res = await fetch("/admin/api/users", {
+    headers: { "X-Admin-Key": key }
+  });
+
+  if (res.status === 403) {
+    document.getElementById("auth-err").textContent = "Incorrect admin key.";
+    document.getElementById("auth-err").style.display = "block";
+    return;
+  }
+
+  ADMIN_KEY = key;
+  document.getElementById("auth-gate").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("key-display").textContent = key;
+
+  const users = await res.json();
+  renderUsers(users);
+}
+
+// ── API helpers ────────────────────────────────────────────────────────────────
+
+async function api(method, path, body) {
+  const res = await fetch(path, {
+    method,
+    headers: { "Content-Type": "application/json", "X-Admin-Key": ADMIN_KEY },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Request failed");
+  return data;
+}
+
+async function loadUsers() {
+  const users = await api("GET", "/admin/api/users");
+  renderUsers(users);
+}
+
+const SCHOOL_NAMES = {
+  hoover:"Hoover (HS)", crescenta:"CVHS (HS)", glendale:"Glendale (HS)",
+  clark:"Clark (HS)", daily:"Daily (HS)", roosevelt:"Roosevelt (MS)",
+  rosemont:"Rosemont (MS)", toll:"Toll (MS)", wilson:"Wilson (MS)",
+  balboa:"Balboa (ES)", cerritos:"Cerritos (ES)", columbus:"Columbus (ES)",
+  dunsmore:"Dunsmore (ES)", edison:"Edison (ES)", franklin:"Franklin (ES)",
+  fremont:"Fremont (ES)", glenoaks:"Glenoaks (ES)", jefferson:"Jefferson (ES)",
+  keppel:"Keppel (ES)", lacrescenta:"La Crescenta (ES)", lincoln:"Lincoln (ES)",
+  mann:"Mann (ES)", marshall:"Marshall (ES)", montevista:"Monte Vista (ES)",
+  mountainave:"Mountain Ave (ES)", muir:"Muir (ES)", valleyview:"Valley View (ES)",
+  verdugowoodlands:"Verdugo Woodlands (ES)", rdwhite:"R.D. White (ES)",
+  cloud:"Cloud Preschool", verdugoacademy:"Verdugo Academy",
+  jewelcity:"Jewel City", pacificave:"Pacific Avenue Education Center",
+};
+
+function renderUsers(users) {
+  document.getElementById("user-count").textContent =
+    users.length === 0 ? "No users yet" : `${users.length} user${users.length === 1 ? "" : "s"}`;
+
+  const tbody = document.getElementById("users-tbody");
+  if (users.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">No users yet. Add one above.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = users.map(u => {
+    const ids = u.schoolIds || (u.schoolId ? [u.schoolId] : []);
+    const schoolLabel = ids.length === 0 ? "—"
+      : ids.length === Object.keys(SCHOOL_NAMES).length ? "All schools"
+      : ids.map(id => SCHOOL_NAMES[id] || id).join(", ");
+    return `
+    <tr>
+      <td class="mono" style="font-size:13px">${esc(u.email)}</td>
+      <td style="font-size:12px;color:var(--muted);max-width:260px">${esc(schoolLabel)}</td>
+      <td>
+        ${u.mustResetPassword
+          ? `<span class="badge badge-amber">Must reset</span>`
+          : `<span class="badge badge-green">Active</span>`}
+      </td>
+      <td style="text-align:right">
+        <button class="btn btn-danger btn-sm"
+          onclick="deleteUser('${esc(u.email)}')"
+          style="font-size:11px">Remove</button>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+// ── Actions ────────────────────────────────────────────────────────────────────
+
+function toggleAllSchools(checked) {
+  document.querySelectorAll('.school-list input[name=school]').forEach(cb => cb.checked = checked);
+}
+
+function getSelectedSchools() {
+  return [...document.querySelectorAll('.school-list input[name=school]:checked')].map(cb => cb.value);
+}
+
+async function addUser() {
+  const email     = document.getElementById("add-email").value.trim().toLowerCase();
+  const password  = document.getElementById("add-password").value;
+  const schoolIds = getSelectedSchools();
+
+  if (!email || !password) { toast("Fill in email and password.", "err"); return; }
+  if (!schoolIds.length)   { toast("Select at least one school.", "err"); return; }
+
+  try {
+    await api("POST", "/admin/api/user", { email, password, schoolIds });
+    toast(`User ${email} added.`, "ok");
+    document.getElementById("add-email").value    = "";
+    document.getElementById("add-password").value = "";
+    document.querySelectorAll('.school-list input[name=school]').forEach(cb => cb.checked = false);
+    document.getElementById("school-all").checked = false;
+    await loadUsers();
+  } catch(e) { toast(e.message, "err"); }
+}
+
+async function resetPassword() {
+  const email    = document.getElementById("reset-email").value.trim().toLowerCase();
+  const password = document.getElementById("reset-password").value;
+
+  if (!email || !password) { toast("Fill in both fields.", "err"); return; }
+
+  try {
+    await api("POST", "/admin/api/reset", { email, password });
+    toast(`Password reset for ${email}.`, "ok");
+    document.getElementById("reset-email").value    = "";
+    document.getElementById("reset-password").value = "";
+    await loadUsers();
+  } catch(e) { toast(e.message, "err"); }
+}
+
+async function deleteUser(email) {
+  if (!confirm(`Remove ${email}? This cannot be undone.`)) return;
+  try {
+    await api("DELETE", `/admin/api/user/${encodeURIComponent(email)}`);
+    toast(`${email} removed.`, "ok");
+    await loadUsers();
+  } catch(e) { toast(e.message, "err"); }
+}
+
+// ── Toasts ─────────────────────────────────────────────────────────────────────
+
+function toast(msg, type = "ok") {
+  const wrap = document.getElementById("toasts");
+  const el   = document.createElement("div");
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+</script>
+</body>
+</html>
