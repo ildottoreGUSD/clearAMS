@@ -224,6 +224,8 @@ def admin_delete_user(email):
 
 # ── Static files ───────────────────────────────────────────────────────────────
 
+PLAYER_DIR = os.path.join(BASE_DIR, "remotion-viz", "dist")
+
 @app.route("/")
 def index():
     return send_from_directory(BASE_DIR, "ClearAMS Dashboard.html")
@@ -232,6 +234,17 @@ def index():
 @app.route("/admin")
 def admin_panel():
     return send_from_directory(BASE_DIR, "admin.html")
+
+
+@app.route("/player")
+@app.route("/player/")
+def player_page():
+    return send_from_directory(PLAYER_DIR, "player.html")
+
+
+@app.route("/player/<path:filename>")
+def player_static(filename):
+    return send_from_directory(PLAYER_DIR, filename)
 
 
 @app.route("/<path:filename>")

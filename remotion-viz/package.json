@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "start": "remotion studio",
-    "render": "remotion render"
+    "render": "remotion render",
+    "build:player": "vite build --config vite.config.js",
+    "dev:player": "vite --config vite.config.js"
   },
   "dependencies": {
     "@remotion/player": "*",

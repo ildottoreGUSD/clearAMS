@@ -19,6 +19,12 @@ echo "Starting Cloudflare tunnel (clearams.gusddev.app)..."
 TUNNEL_PID=$!
 echo "  tunnel PID: $TUNNEL_PID"
 
+# ── Remotion player (build if dist/ missing) ──────────────────────────────────
+if [ ! -d "remotion-viz/dist" ]; then
+  echo "Building Remotion player..."
+  cd remotion-viz && npm run build:player && cd ..
+fi
+
 # ── Flask server ──────────────────────────────────────────────────────────────
 echo "Starting ClearAMS server on port 8080..."
 python3 server.py

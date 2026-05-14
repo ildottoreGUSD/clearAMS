@@ -1,5 +1,18 @@
 # Dev Log
 
+## 2026-05-14 (continued 3)
+- Replaced SVG logo with icon-512.png served as a static file; sized to 32px in nav bars, 56px in login card center.
+- Removed massive base64-embedded PNG from dashboard HTML — file size dropped from ~530KB to ~50KB.
+- Fixed critical "no data" bug: AllocationRing, BudgetBar, and YearColumn were hardcoded to their pre-animation (invisible) state; now fall back to fully visible values when GSAP is unavailable (CDN block or SRI mismatch).
+- Fixed Lucide I component: now forwards `style` prop and handles both lucide.icons[name] and lucide[name] API shapes.
+- Updated disclaimer to "Figures accurate as of May 1, 2026"; introduced DATA_DATE constant — single place to update on each import cycle.
+- Redesigned YearColumn: removed staffing/supplies bar breakdown (27 numbers → 12); bigger ring (96→120px); cleaner expended/remaining card with single usage bar.
+- Added cinematic school-switch GSAP transition (fade + y-slide on entire content body when school changes).
+- Remotion animation panel enlarged (420→520px) and promoted with subtitle.
+- Added Remotion @remotion/player web app (remotion-viz/player.html + src/player-main.jsx); built to remotion-viz/dist/ and served by Flask at /player?school=<id>.
+- Expanded remotion-viz/src/data.js from 8 schools to all 33 schools.
+- Updated start_server.sh to auto-build Remotion player dist if missing.
+
 ## 2026-05-14 (continued 2)
 - Set up permanent Cloudflare named tunnel (ID: a3d62123-bdae-42bc-94f8-f759e5f04d44) routing clearams.gusddev.app → localhost:8080 via gusddev.app Cloudflare zone.
 - Updated start_server.sh to auto-download cloudflared to /tmp if missing (survives Codespace restarts), start the tunnel in the background, then launch Flask — single command brings up both server and public URL.

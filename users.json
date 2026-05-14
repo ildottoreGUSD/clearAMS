@@ -1,1 +1,41 @@
-{}
+{
+  "eahangarzadeh@gusd.net": {
+    "passwordHash": "$2b$12$5bDgFyZ3nwinhMbSDQlhR.yKOwyNu42HVMuA093fi/PypzQ6kzW5e",
+    "schoolIds": [
+      "hoover",
+      "crescenta",
+      "glendale",
+      "clark",
+      "daily",
+      "roosevelt",
+      "rosemont",
+      "toll",
+      "wilson",
+      "balboa",
+      "cerritos",
+      "columbus",
+      "dunsmore",
+      "edison",
+      "franklin",
+      "fremont",
+      "glenoaks",
+      "jefferson",
+      "keppel",
+      "lacrescenta",
+      "lincoln",
+      "mann",
+      "marshall",
+      "montevista",
+      "mountainave",
+      "muir",
+      "valleyview",
+      "verdugowoodlands",
+      "rdwhite",
+      "cloud",
+      "verdugoacademy",
+      "jewelcity",
+      "pacificave"
+    ],
+    "mustResetPassword": false
+  }
+}
