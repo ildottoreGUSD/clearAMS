@@ -3,7 +3,7 @@ REM ── ClearAMS Server Launcher ──────────────�
 REM Edit ADMIN_KEY below to set a permanent admin password for the admin panel.
 REM Keep it secret — anyone with this key can add/remove user accounts.
 
-set ADMIN_KEY=changeme
+set ADMIN_KEY=LASKYseaside91202
 
 cd /d "%~dp0"
 python3 server.py
