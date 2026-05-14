@@ -1,5 +1,9 @@
 # Dev Log
 
+## 2026-05-14 (continued 5)
+- Fixed GSAP CDN block: removed SRI `integrity` attribute from the GSAP script tag (cloudflare CDN had updated the file, causing hash mismatch and browser block). Dashboard ring/bar animations now load correctly.
+- Fixed Remotion player crash (`TypeError: e is not a function`): `Easing.expo` is undefined in Remotion 4.0.461; replaced with `Easing.cubic` in CountUp component's interpolate call. Rebuilt player dist.
+
 ## 2026-05-14 (continued 4)
 - Fixed icon-512.png rendering at natural size (~512px) in nav bar: Tailwind CDN preflight sets `img { height: auto }` which overrides the HTML `height` attribute. Moved height to inline `style` prop (which takes CSS precedence). Nav bars now correctly display icon at 24px.
 

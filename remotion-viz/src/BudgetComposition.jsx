@@ -114,7 +114,7 @@ function CountUp({ value, delay = 0, style }) {
   const frame = useCurrentFrame();
   const p = interpolate(frame, [delay, delay + 45], [0, 1], {
     extrapolateRight: "clamp",
-    easing: Easing.out(Easing.expo),
+    easing: Easing.out(Easing.cubic),
   });
   const displayed = Math.round(value * p);
   const opacity   = interpolate(frame, [delay, delay + 10], [0, 1], { extrapolateRight: "clamp" });
