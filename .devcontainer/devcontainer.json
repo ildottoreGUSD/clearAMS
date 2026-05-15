@@ -1,0 +1,11 @@
+{
+  "name": "ClearAMS",
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "ClearAMS Dashboard",
+      "onAutoForward": "notify"
+    }
+  },
+  "postStartCommand": "nohup bash start_server.sh > /tmp/clearams.log 2>&1 &"
+}
