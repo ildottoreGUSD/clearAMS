@@ -1,5 +1,11 @@
 # Dev Log
 
+## 2026-05-15
+- Replaced the iframe-embedded Remotion video player on the dashboard ("Animated Budget Overview" section) with an inline animated SVG (`BudgetSVGChart` component). GSAP animates the SVG `<rect>` `y`/`height` attributes once on mount (staggered per year, `expo.out` easing); dollar labels and callout cards fade in afterwards. Plays through once and freezes on the final frame — no video controls, no loop. School switches re-trigger the animation via `key={school.id}`.
+- Also dropped `loop` and `controls` props from the standalone `/player` Remotion route in `player-main.jsx` so direct visits to that URL also play once and stop. Rebuilt `remotion-viz/dist/`.
+- Removed the now-redundant "Full screen" external link from the dashboard overview header (SVG is full-quality inline).
+- Added `.devcontainer/devcontainer.json` so Flask + Cloudflare tunnel auto-start on every Codespace boot. `postStartCommand` runs `start_server.sh` in the background via `nohup ... &` (returns immediately so container startup isn't blocked); logs land in `/tmp/clearams.log`. Forwards port 8080 with a labeled entry in the VS Code Ports panel.
+
 ## 2026-05-14 (continued 6)
 - Rebuilt Remotion composition: replaced looping year-card animation with a comparative grouped bar chart (Allocation vs. Expended for all three fiscal years). Bars animate in with spring physics staggered by year group. Four horizontal grid lines with Y-axis dollar labels give scale context.
 - Added three explanatory callout cards below the chart — one per year — that pop in after their bars animate. Cards are data-driven: auto-detect zero-spending launch years, over-budget conditions, and current-year utilization status with contextual language.

@@ -26,8 +26,6 @@ function PlayerApp() {
       compositionWidth={1280}
       compositionHeight={720}
       style={{ width: "100%", aspectRatio: "16/9" }}
-      controls
-      loop
       autoPlay
     />
   );
