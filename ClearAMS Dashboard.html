@@ -346,6 +346,46 @@ const SCHOOLS = {
 const DATA_DATE    = "May 1, 2026";
 const SCHOOL_LIST  = Object.values(SCHOOLS);
 
+// ── FY 2024–25 "Available Balance After A/V Projects" (Allocation spreadsheet col U) ──
+// Drives the "Remaining" figure on the FY 2024–25 card so it reflects funds the school
+// still actually has (Total Balance minus Studio Spectrum A/V quote), instead of the
+// naive allocation − expenditure of the single fiscal year in isolation.
+const FY2425_AVAILABLE_BALANCE = {
+  hoover:           157989.81,
+  crescenta:        331324.17,
+  glendale:         415308.17,
+  clark:            386298.35,
+  daily:             40652.45,
+  roosevelt:         64575.60,
+  rosemont:         445324.53,
+  toll:             428699.70,
+  wilson:           340107.61,
+  balboa:           196272.82,
+  cerritos:         147029.66,
+  columbus:         -39290.28,
+  dunsmore:          39733.36,
+  edison:           241310.91,
+  franklin:          57194.44,
+  fremont:           87531.86,
+  glenoaks:          31185.30,
+  jefferson:        155520.20,
+  keppel:           103586.96,
+  lacrescenta:       25879.88,
+  lincoln:          143190.63,
+  mann:             123178.92,
+  marshall:          49117.59,
+  montevista:        49629.10,
+  mountainave:       74990.90,
+  muir:             100222.11,
+  valleyview:        61895.13,
+  verdugowoodlands: 166382.27,
+  rdwhite:          464271.44,
+  cloud:             11846.56,
+  verdugoacademy:    57211.31,
+  jewelcity:          3207.36,
+  pacificave:         5677.74,
+};
+
 // ── Bucket ────────────────────────────────────────────────────────────────────
 const STAFFING_ACCENT = "#13315C";
 const SUPPLIES_ACCENT = "#3E7BFA";
@@ -468,10 +508,22 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
   const data       = school[key];
   const isCurrent  = status === "current";
   const { allocation, totalExp } = data;
-  const remaining  = allocation - totalExp;
   const usagePct   = allocation > 0 ? totalExp / allocation : 0;
   const overspent  = totalExp > allocation;
   const fillColor  = overspent ? "#DC2626" : usagePct > 0.92 ? "#B45309" : "#15803D";
+
+  // Remaining: for FY 2024–25, use spreadsheet column U (Available Balance After
+  // A/V Projects) so the figure reflects funds the school actually still has.
+  // For other years, fall back to the simple alloc − expenditure.
+  const overrideRemaining = key === "fy2425" ? FY2425_AVAILABLE_BALANCE[school.id] : undefined;
+  const remaining = (typeof overrideRemaining === "number")
+    ? overrideRemaining
+    : allocation - totalExp;
+  const remainingColor = remaining < 0
+    ? "var(--red)"
+    : remaining < allocation * 0.05
+      ? "var(--amber)"
+      : "var(--green)";
 
   const sc = isCurrent
     ? { bg:"var(--blue-soft)",  text:"var(--blue)",  dot:"#1D4ED8", anim:true  }
@@ -530,9 +582,14 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
           <div style={{ padding:"18px 20px", borderLeft:"1px solid var(--line)" }}>
             <div className="eyebrow" style={{ marginBottom:7 }}>{remaining >= 0 ? "Remaining" : "Over"}</div>
             <div className="mono" style={{ fontSize:18, fontWeight:700, lineHeight:1,
-              color: overspent ? "var(--red)" : remaining < allocation * 0.05 ? "var(--amber)" : "var(--green)" }}>
+              color: remainingColor }}>
               {remaining >= 0 ? "" : "−"}<AnimNum value={Math.abs(remaining)} format={fmt$} />
             </div>
+            {key === "fy2425" && typeof overrideRemaining === "number" && (
+              <div style={{ fontSize:9.5, color:"var(--muted)", marginTop:5, letterSpacing:".02em", lineHeight:1.3 }}>
+                After A/V projects
+              </div>
+            )}
           </div>
         </div>
         <div style={{ padding:"10px 20px 16px", borderTop:"1px solid var(--line)" }}>

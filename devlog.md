@@ -1,5 +1,8 @@
 # Dev Log
 
+## 2026-05-16
+- FY 2024–25 "Remaining" figure now reflects column U from the allocation spreadsheet ("Available Balance After A/V Projects" — Total Balance minus Studio Spectrum quote), instead of the naive `allocation − expenditure` of that single fiscal year. Driven by a new `FY2425_AVAILABLE_BALANCE` lookup keyed by school ID (33 entries). Ring/usage bar/% utilized still track actual 24–25 spend; only the right-hand "Remaining" number switches over. Negative U (e.g. Columbus: −$39,290) renders red as "Over". Added a small "After A/V projects" caption beneath the figure so users don't read it as a single-year balance.
+
 ## 2026-05-15
 - Replaced the iframe-embedded Remotion video player on the dashboard ("Animated Budget Overview" section) with an inline animated SVG (`BudgetSVGChart` component). GSAP animates the SVG `<rect>` `y`/`height` attributes once on mount (staggered per year, `expo.out` easing); dollar labels and callout cards fade in afterwards. Plays through once and freezes on the final frame — no video controls, no loop. School switches re-trigger the animation via `key={school.id}`.
 - Also dropped `loop` and `controls` props from the standalone `/player` Remotion route in `player-main.jsx` so direct visits to that URL also play once and stop. Rebuilt `remotion-viz/dist/`.
