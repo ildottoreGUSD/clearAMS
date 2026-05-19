@@ -1,5 +1,10 @@
 # Dev Log
 
+## 2026-05-19 (continued)
+- Reworked VAPA hero image layout: login page now shows the full image (no cropping) centered at 400px width, just wider than the 360px sign-in form. Dashboard hero strip removed entirely (was full-width 110px background-cover — too large and cropped).
+- Fixed Pillow watermark-removal patch on vapa-icon-clean.png: repainted grey (185,189,192) rectangle at bottom-right corner with white to match the illustration's paper background.
+- App icon: replaced paintbrush with a painter's palette (kidney-shaped gold body, thumb hole, red/blue/green paint dabs) in both favicon.svg and the ClearAMSLogo component. Regenerated icon-512.png.
+
 ## 2026-05-19
 - Redesigned app icon: replaced original flower-petal PNG with a California sunset / performing arts theme (drama masks, California poppies, beamed music notes, paint brush, starfield). Source preserved as `favicon.svg`.
 - Iterated on icon: switched to user-supplied Gemini-generated VAPA artwork (ballet shoes, drama masks, rainbow music wave, film camera). Removed Gemini watermark by sampling and painting over the bottom-right corner with Pillow. Letterboxed 1408×768 source into 512×512 `icon-512.png` on a matching background.

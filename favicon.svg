@@ -13,7 +13,11 @@
   <ellipse cx="36" cy="26" rx="4" ry="3" fill="#F5C020" transform="rotate(-20 36 26)"/>
   <line x1="39.5" y1="24" x2="39.5" y2="11" stroke="#F5C020" stroke-width="1.8"/>
   <line x1="27.5" y1="13" x2="39.5" y2="11" stroke="#F5C020" stroke-width="3"/>
-  <text x="50" y="33" font-size="22" fill="#F5C020" opacity="0.85" font-family="serif" font-style="italic">♪</text>
+  <path d="M53,18 Q52,11 62,11 Q72,11 71,21 Q70,32 61,32 Q54,32 52,27 Q49,22 53,18 Z" fill="#C89020" opacity="0.85"/>
+  <circle cx="57" cy="27" r="2.5" fill="#12102A"/>
+  <circle cx="58" cy="15" r="2.2" fill="#E85040" opacity="0.9"/>
+  <circle cx="65" cy="13" r="2.2" fill="#4888E0" opacity="0.9"/>
+  <circle cx="70" cy="20" r="2.2" fill="#48C848" opacity="0.9"/>
   <rect x="1" y="44" width="78" height="9" rx="3" fill="#B8B8C2" stroke="#9898A8" stroke-width="1"/>
   <rect x="27" y="46" width="26" height="5" rx="2.5" fill="#A8A8B4" stroke="#9898A8" stroke-width="0.6"/>
 </svg>
