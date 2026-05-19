@@ -1,5 +1,8 @@
 # Dev Log
 
+## 2026-05-19 (continued 7)
+- Removed "After A/V projects" caption from the FY 2024–25 Remaining cell.
+
 ## 2026-05-19 (continued 6)
 - Added Site Expenditure Plan links to each year column header. Extracted 30 plan files (.docx/.pdf) from zip into plans/. SITE_PLANS lookup maps school ID + fiscal year to filename; link renders as "📄 Site Expenditure Plan" beneath the FY label and opens in a new tab. 27 of 33 schools have a 25-26 plan; Clark, Marshall, Mountain Ave, Cloud, and Jewel City have no file yet. Fixed a variable ordering bug (key was undefined when planFile was computed) that prevented all links from rendering.
 - Removed FY 2023-24 year column and bar from the budget overview chart. All fy2324 data remains in the SCHOOLS object for future calculations.

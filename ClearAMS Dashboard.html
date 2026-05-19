@@ -713,11 +713,7 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
               color: remainingColor }}>
               {remaining >= 0 ? "" : "−"}<AnimNum value={Math.abs(remaining)} format={fmt$} />
             </div>
-            {key === "fy2425" && typeof overrideRemaining === "number" && (
-              <div style={{ fontSize:9.5, color:"var(--muted)", marginTop:5, letterSpacing:".02em", lineHeight:1.3 }}>
-                After A/V projects
-              </div>
-            )}
+
             {(key === "fy2425" || key === "fy2526") && (
               <button onClick={() => setShowWaiver(true)} style={{
                 display:"block", marginTop:7, fontSize:10, fontWeight:700,
