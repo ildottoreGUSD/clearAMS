@@ -1,5 +1,8 @@
 # Dev Log
 
+## 2026-05-19 (continued 4)
+- Added "Waiver Granted ↗" link to the Remaining field in the FY 2024–25 and FY 2025–26 year columns. Clicking opens a modal (WaiverModal component) showing both CDE waiver allowances: 2024–25 permits non-certified staffing support (community arts orgs, professional residencies, specialized instruction, masterclasses); 2025–26 permits materials and equipment spending (external partnerships, stage infrastructure, audio tech, digital media). Modal closes on overlay click or ×.
+
 ## 2026-05-19 (continued 3)
 - Login screen: replaced "Sign in to ClearAMS" heading with the GUSD VAPA Logo.png (120px circular badge, centered). "ClearAMS" now appears beneath it in large serif letters (38px). Description text and sign-in form unchanged.
 
