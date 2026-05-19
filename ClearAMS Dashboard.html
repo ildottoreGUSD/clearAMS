@@ -1054,10 +1054,15 @@ function LoginScreen({ onLogin }) {
         </div>
       </div>
 
+      {/* VAPA hero image */}
+      <div style={{ width:"100%", background:"#f5f5f7" }}>
+        <img src="/vapa-icon-clean.png" alt="Visual and Performing Arts"
+          style={{ width:"100%", height:"auto", display:"block" }}/>
+      </div>
+
       <div className="flex-1 flex flex-col items-center justify-center px-8">
         <div className="fade-up" style={{ width:"100%", maxWidth:360 }}>
           <div className="text-center mb-8">
-            <ClearAMSLogo height={56} style={{ display:"block", margin:"0 auto 20px", maxWidth:"100%" }} />
             <h2 className="serif" style={{ fontSize:34, lineHeight:1.05, color:"var(--ink)" }}>
               Sign in to ClearAMS
             </h2>
