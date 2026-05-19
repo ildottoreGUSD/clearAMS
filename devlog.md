@@ -1,5 +1,13 @@
 # Dev Log
 
+## 2026-05-19
+- Redesigned app icon: replaced original flower-petal PNG with a California sunset / performing arts theme (drama masks, California poppies, beamed music notes, paint brush, starfield). Source preserved as `favicon.svg`.
+- Iterated on icon: switched to user-supplied Gemini-generated VAPA artwork (ballet shoes, drama masks, rainbow music wave, film camera). Removed Gemini watermark by sampling and painting over the bottom-right corner with Pillow. Letterboxed 1408×768 source into 512×512 `icon-512.png` on a matching background.
+- Added full-width VAPA hero image banner to both the login screen (below top bar, above sign-in form) and the main dashboard (below header, above school title). Image renders at full natural width/height — no cropping.
+- Replaced `ClearAMSLogo` component with an inline SVG laptop icon: silver chassis, dark screen with five music staff lines and gold beamed eighth-notes. Used as the small header logo on all screens and as `favicon.svg` / `icon-512.png` for browser tab and home screen.
+- Wired `<link rel="icon" type="image/svg+xml">` and `<link rel="apple-touch-icon">` in the HTML `<head>`.
+- Added Railway deployment notes: `users.json` committed to repo (persists through redeploys); Excel file updated by committing new version and pushing.
+
 ## 2026-05-16
 - FY 2024–25 "Remaining" figure now reflects column U from the allocation spreadsheet ("Available Balance After A/V Projects" — Total Balance minus Studio Spectrum quote), instead of the naive `allocation − expenditure` of that single fiscal year. Driven by a new `FY2425_AVAILABLE_BALANCE` lookup keyed by school ID (33 entries). Ring/usage bar/% utilized still track actual 24–25 spend; only the right-hand "Remaining" number switches over. Negative U (e.g. Columbus: −$39,290) renders red as "Over". Added a small "After A/V projects" caption beneath the figure so users don't read it as a single-year balance.
 
