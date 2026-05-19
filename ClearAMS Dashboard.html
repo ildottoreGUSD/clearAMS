@@ -528,9 +528,61 @@ function BudgetBar({ label, share, budget, expended, accent, schoolKey, yearKey,
 }
 
 // ── Year column ───────────────────────────────────────────────────────────────
+function WaiverModal({ onClose }) {
+  return (
+    <div onClick={onClose} style={{
+      position:"fixed", inset:0, zIndex:1000,
+      background:"rgba(11,27,51,.5)", backdropFilter:"blur(3px)",
+      display:"flex", alignItems:"center", justifyContent:"center", padding:24
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background:"#fff", borderRadius:18, padding:"28px 32px",
+        maxWidth:500, width:"100%", boxShadow:"0 24px 64px rgba(11,27,51,.22)",
+        maxHeight:"90vh", overflowY:"auto"
+      }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:22 }}>
+          <div>
+            <div style={{ fontSize:10, fontWeight:700, letterSpacing:".08em", textTransform:"uppercase", color:"#1D4ED8", marginBottom:4 }}>Prop 28</div>
+            <div style={{ fontSize:17, fontWeight:700, color:"var(--ink)", lineHeight:1.2 }}>CDE Waiver Allowances</div>
+          </div>
+          <button onClick={onClose} style={{ border:"none", background:"#F1F5F9", borderRadius:99, width:30, height:30, fontSize:16, cursor:"pointer", color:"var(--muted)", flexShrink:0, marginLeft:16 }}>×</button>
+        </div>
+
+        {/* 2024-25 */}
+        <div style={{ marginBottom:22 }}>
+          <div style={{ display:"inline-block", fontSize:9, fontWeight:700, letterSpacing:".06em", textTransform:"uppercase", color:"#92400E", background:"#FEF3C7", padding:"3px 10px", borderRadius:99, marginBottom:10 }}>2024–25 Waiver Allowance</div>
+          <p style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.65, margin:"0 0 10px" }}>
+            The CDE approved altering the 80/20 rule for this year. More than 20% of funds can go toward non-certified staffing support. This waiver specifically allows the district to:
+          </p>
+          <ul style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.75, paddingLeft:20, margin:0 }}>
+            <li>Partner with community arts organizations.</li>
+            <li>Fund residencies with professional artists.</li>
+            <li>Provide specialized discipline instruction.</li>
+            <li>Deliver artist-led masterclasses and workshops.</li>
+          </ul>
+        </div>
+
+        <div style={{ borderTop:"1px solid var(--line)", paddingTop:22 }}>
+          <div style={{ display:"inline-block", fontSize:9, fontWeight:700, letterSpacing:".06em", textTransform:"uppercase", color:"#1e40af", background:"#DBEAFE", padding:"3px 10px", borderRadius:99, marginBottom:10 }}>2025–26 Waiver Allowance</div>
+          <p style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.65, margin:"0 0 10px" }}>
+            The CDE approved altering the 80/20 rule for this year too. More than 20% of funds can buy materials and equipment. This waiver specifically allows the district to:
+          </p>
+          <ul style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.75, paddingLeft:20, margin:0 }}>
+            <li>Leverage external professional arts partnerships.</li>
+            <li>Upgrade physical stage infrastructure and lighting.</li>
+            <li>Modernize acoustic settings and audio technology.</li>
+            <li>Procure digital media studio materials.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
   const colRef  = useRef(null);
   const fillRef = useRef(null);
+  const [showWaiver, setShowWaiver] = React.useState(false);
   const { key, label, status } = yearMeta;
   const data       = school[key];
   const isCurrent  = status === "current";
@@ -617,8 +669,17 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
                 After A/V projects
               </div>
             )}
+            {(key === "fy2425" || key === "fy2526") && (
+              <button onClick={() => setShowWaiver(true)} style={{
+                display:"block", marginTop:7, fontSize:10, fontWeight:700,
+                letterSpacing:".04em", color:"#1D4ED8", background:"none",
+                border:"none", cursor:"pointer", padding:0, textDecoration:"underline",
+                textDecorationColor:"#93C5FD"
+              }}>Waiver Granted ↗</button>
+            )}
           </div>
         </div>
+        {showWaiver && <WaiverModal onClose={() => setShowWaiver(false)} />}
         <div style={{ padding:"10px 20px 16px", borderTop:"1px solid var(--line)" }}>
           <div style={{ height:7, background:"#EDF0F5", borderRadius:999, overflow:"hidden" }}>
             <div ref={fillRef} style={{
