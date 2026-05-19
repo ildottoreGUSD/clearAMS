@@ -1,5 +1,10 @@
 # Dev Log
 
+## 2026-05-19 (continued 9)
+- Added spending pace indicator to FY 2025–26 column: compares % utilized against the fraction of the fiscal year elapsed (July–June window) and shows "On track," "Ahead of pace," or "Behind pace" pill below the usage bar.
+- Added year-over-year allocation delta (▲/▼ vs prior year) beneath the Starting Allocation number on each year column.
+- Added FY 2026–27 Planning Dates panel below the year columns: draft recommended before June 2026 (with template link), hard deadline September 15, 2026, and a warning that no expenditures will be approved without an approved compliant plan on record.
+
 ## 2026-05-19 (continued 8)
 - Removed Animated Budget Overview section (BudgetSVGChart, CHART_YEARS, BudgetBar, dead accent constants) — year columns already tell the full story.
 - Added FY 2026–27 as a greyed-out upcoming column (leftmost). Shows a dashed-border "Allocations Expected July 2026" banner and a link to the district's 26-27 Site Expenditure Plan template (Google Docs /copy link).
