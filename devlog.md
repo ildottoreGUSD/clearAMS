@@ -1,5 +1,10 @@
 # Dev Log
 
+## 2026-05-19 (continued 8)
+- Removed Animated Budget Overview section (BudgetSVGChart, CHART_YEARS, BudgetBar, dead accent constants) — year columns already tell the full story.
+- Added FY 2026–27 as a greyed-out upcoming column (leftmost). Shows a dashed-border "Allocations Expected July 2026" banner and a link to the district's 26-27 Site Expenditure Plan template (Google Docs /copy link).
+- Dropped "Official" from the footer disclaimer line.
+
 ## 2026-05-19 (continued 7)
 - Removed "After A/V projects" caption from the FY 2024–25 Remaining cell.
 

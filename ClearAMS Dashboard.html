@@ -140,8 +140,9 @@ function AnimNum({ value, format=(v=>v), duration=420, className, style }) {
 
 // ── School data — sourced from "Allocation Updated 5-1-26 v3.xlsx" ────────────
 const YEARS = [
-  { key:"fy2526", label:"FY 2025–26", status:"current", fileName:"Allocation Updated 5-1-26 v3.xlsx", importedOn:"May 1, 2026" },
-  { key:"fy2425", label:"FY 2024–25", status:"final",   fileName:"Allocation Updated 5-1-26 v3.xlsx", importedOn:"May 1, 2026" },
+  { key:"fy2627", label:"FY 2026–27", status:"upcoming" },
+  { key:"fy2526", label:"FY 2025–26", status:"current",  fileName:"Allocation Updated 5-1-26 v3.xlsx", importedOn:"May 1, 2026" },
+  { key:"fy2425", label:"FY 2024–25", status:"final",    fileName:"Allocation Updated 5-1-26 v3.xlsx", importedOn:"May 1, 2026" },
 ];
 
 const SCHOOLS = {
@@ -387,9 +388,6 @@ const FY2425_AVAILABLE_BALANCE = {
   pacificave:         5677.74,
 };
 
-// ── Bucket ────────────────────────────────────────────────────────────────────
-const STAFFING_ACCENT = "#13315C";
-const SUPPLIES_ACCENT = "#3E7BFA";
 
 // ── ClearAMS logo: laptop with music notation ─────────────────────────────────
 function ClearAMSLogo({ height = 48, onClick, style: extraStyle }) {
@@ -460,71 +458,6 @@ function AllocationRing({ pct, size=96, schoolKey, yearKey }) {
   );
 }
 
-// ── Animated horizontal budget bar ────────────────────────────────────────────
-function BudgetBar({ label, share, budget, expended, accent, schoolKey, yearKey, delay=0 }) {
-  const fillRef    = useRef(null);
-  const pct        = budget > 0 ? expended / budget : 0;
-  const overBudget = expended > budget;
-  const remaining  = budget - expended;
-  const fillColor  = overBudget ? "#DC2626" : accent;
-
-  useEffect(() => {
-    if (!fillRef.current || typeof gsap === "undefined") return;
-    gsap.fromTo(fillRef.current,
-      { scaleX: 0 },
-      { scaleX: Math.min(pct, 1), duration: 1.25, ease: "expo.out",
-        transformOrigin: "left center", delay }
-    );
-  }, [schoolKey, yearKey]);
-
-  return (
-    <div style={{ marginBottom:20 }}>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:7 }}>
-        <div style={{ display:"flex", alignItems:"center", gap:7 }}>
-          <span style={{ width:8, height:8, borderRadius:"50%", background:accent, flexShrink:0, display:"inline-block" }} />
-          <span style={{ fontSize:11, fontWeight:700, letterSpacing:".07em", textTransform:"uppercase", color:"var(--ink-2)" }}>
-            {label}
-          </span>
-          <span style={{ fontSize:10, color:"var(--muted)", background:"var(--line-2)", borderRadius:4,
-            padding:"1px 6px", fontWeight:600 }}>
-            {share}%
-          </span>
-        </div>
-        <span className="mono" style={{ fontSize:12, fontWeight:600, color:"var(--ink)" }}>{fmt$(budget)}</span>
-      </div>
-
-      <div style={{ height:10, background:"#EDF0F5", borderRadius:999, overflow:"hidden",
-        border:"1px solid var(--line)", position:"relative" }}>
-        <div ref={fillRef} style={{
-          position:"absolute", top:0, bottom:0, left:0, right:0,
-          background:fillColor, borderRadius:999,
-          boxShadow:"inset 0 1px 0 rgba(255,255,255,.4)",
-          transform: typeof gsap !== "undefined" ? "scaleX(0)" : `scaleX(${Math.min(pct, 1)})`, transformOrigin:"left center",
-        }} />
-        {overBudget && (
-          <div style={{ position:"absolute", inset:0,
-            background:"repeating-linear-gradient(90deg,rgba(220,38,38,.18) 0 4px,transparent 4px 8px)" }} />
-        )}
-      </div>
-
-      <div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
-        <span style={{ fontSize:11 }}>
-          <span className="mono" style={{ fontWeight:600, color: overBudget ? "var(--red)" : "var(--ink)" }}>
-            <AnimNum value={expended} format={fmt$} />
-          </span>
-          <span style={{ color:"var(--muted)", marginLeft:4 }}>expended</span>
-        </span>
-        <span style={{ fontSize:11 }}>
-          <span className="mono" style={{ fontWeight:600,
-            color: remaining<0?"var(--red)": remaining<budget*.08?"var(--amber)":"var(--ink-2)" }}>
-            {remaining>=0?"":"−"}{fmt$(Math.abs(remaining))}
-          </span>
-          <span style={{ color:"var(--muted)", marginLeft:4 }}>{remaining>=0?"remaining":"over"}</span>
-        </span>
-      </div>
-    </div>
-  );
-}
 
 // ── Site Expenditure Plan links (keyed by school ID → fiscal year → filename) ─
 const SITE_PLANS = {
@@ -614,12 +547,54 @@ function WaiverModal({ yearKey, onClose }) {
   );
 }
 
+const PLAN_TEMPLATE_URL = "https://docs.google.com/document/d/1H4lQyzfd9wcbD_SeZYG73cyHikeJfy9X/copy";
+
 function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
   const colRef  = useRef(null);
   const fillRef = useRef(null);
   const [showWaiver, setShowWaiver] = React.useState(false);
   const [showOverageWarn, setShowOverageWarn] = React.useState(false);
   const { key, label, status } = yearMeta;
+
+  if (status === "upcoming") {
+    return (
+      <div style={{ width:colWidth, flexShrink:0 }}>
+        {/* Year header */}
+        <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:20 }}>
+          <div style={{ fontSize:17, fontWeight:700, color:"#94A3B8", letterSpacing:"-.02em" }}>{label}</div>
+          <div style={{ display:"flex", alignItems:"center", gap:6, borderRadius:999, padding:"5px 12px",
+            background:"#F1F5F9", fontSize:10.5, fontWeight:600, color:"#94A3B8", flexShrink:0 }}>
+            <span style={{ width:5, height:5, borderRadius:"50%", background:"#CBD5E1", display:"inline-block" }} />
+            Upcoming
+          </div>
+        </div>
+
+        {/* Allocations expected banner */}
+        <div className="card" style={{ padding:"32px 24px", marginBottom:14, textAlign:"center",
+          background:"#F8FAFC", borderStyle:"dashed" }}>
+          <div style={{ fontSize:10, fontWeight:700, letterSpacing:".08em", textTransform:"uppercase",
+            color:"#94A3B8", marginBottom:10 }}>Allocations Expected</div>
+          <div style={{ fontSize:28, fontWeight:700, color:"#CBD5E1", letterSpacing:"-.02em" }}>July 2026</div>
+          <div style={{ fontSize:11, color:"#94A3B8", marginTop:8, lineHeight:1.5 }}>
+            Prop 28 funding amounts for FY 2026–27<br/>will be published by CDE in July.
+          </div>
+        </div>
+
+        {/* Plan template link */}
+        <div className="card" style={{ padding:"18px 20px", background:"#F8FAFC", borderStyle:"dashed" }}>
+          <div style={{ fontSize:11, fontWeight:700, color:"#64748B", marginBottom:4 }}>Start planning now</div>
+          <div style={{ fontSize:11, color:"#94A3B8", marginBottom:12, lineHeight:1.5 }}>
+            Use the district template to draft your FY 2026–27 Site Expenditure Plan.
+          </div>
+          <a href={PLAN_TEMPLATE_URL} target="_blank" rel="noreferrer" style={{
+            display:"inline-flex", alignItems:"center", gap:6,
+            fontSize:11, fontWeight:700, color:"#1D4ED8",
+            textDecoration:"underline", textDecorationColor:"#93C5FD"
+          }}>📋 26-27 Plan Template ↗</a>
+        </div>
+      </div>
+    );
+  }
   const planFile = (SITE_PLANS[school.id] || {})[key];
   const planUrl  = planFile ? `/plans/${encodeURIComponent(planFile)}` : null;
   const fy2425balance = FY2425_AVAILABLE_BALANCE[school.id];
@@ -783,260 +758,6 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
   );
 }
 
-// ── Animated budget overview (inline SVG, one-shot animation) ─────────────────
-const CHART_YEARS = [
-  { key:"fy2526", label:"FY 2025–26", tag:"Live · Current",  tagBg:"#1D4ED8", tagFg:"#FFFFFF" },
-  { key:"fy2425", label:"FY 2024–25", tag:"Growth Year",     tagBg:"#FEF3C7", tagFg:"#92400E" },
-];
-
-function BudgetSVGChart({ school }) {
-  const W = 1200, H = 380;
-  const padL = 92, padR = 40, padT = 32, padB = 36;
-  const chartW = W - padL - padR;
-  const chartH = H - padT - padB;
-  const groupW = chartW / 3;
-  const barW = 64, barGap = 16;
-  const baseY = padT + chartH;
-
-  const items = CHART_YEARS.map((yr, i) => {
-    const d = school[yr.key];
-    const isOver  = d.totalExp > d.allocation && d.totalExp > 0;
-    const isAmber = !isOver && d.totalExp > d.allocation * 0.88 && d.totalExp > 0;
-    const pct     = d.allocation > 0 && d.totalExp > 0
-      ? (d.totalExp / d.allocation * 100).toFixed(1) : "0.0";
-    return { ...yr, d, isOver, isAmber, pct, i };
-  });
-
-  const allAmounts = items.flatMap(it => [it.d.allocation, it.d.totalExp]).filter(v => v > 0);
-  const rawMax = Math.max(...allAmounts, 1);
-  const maxVal = rawMax * 1.20;
-  const gridFracs = [0.25, 0.5, 0.75, 1.0];
-
-  const refs = useRef({});
-
-  useEffect(() => {
-    if (typeof gsap === "undefined") return;
-    items.forEach((it) => {
-      const aBar = refs.current[`${it.key}-alloc`];
-      const eBar = refs.current[`${it.key}-exp`];
-      const aLbl = refs.current[`${it.key}-allocLabel`];
-      const eLbl = refs.current[`${it.key}-expLabel`];
-      const delay = it.i * 0.22;
-
-      const ah = (it.d.allocation / maxVal) * chartH;
-      const eh = (it.d.totalExp   / maxVal) * chartH;
-      const yA = baseY - Math.max(ah, 2);
-      const yE = baseY - Math.max(eh, 2);
-
-      if (aBar) gsap.fromTo(aBar,
-        { attr: { y: baseY, height: 0 } },
-        { attr: { y: yA, height: Math.max(ah, 2) },
-          duration: 0.95, ease: "expo.out", delay });
-      if (eBar) gsap.fromTo(eBar,
-        { attr: { y: baseY, height: 0 } },
-        { attr: { y: yE, height: Math.max(eh, 2) },
-          duration: 0.95, ease: "expo.out", delay: delay + 0.14 });
-      if (aLbl) gsap.fromTo(aLbl,
-        { opacity: 0, y: 6 },
-        { opacity: 1, y: 0, duration: 0.4, delay: delay + 0.75 });
-      if (eLbl) gsap.fromTo(eLbl,
-        { opacity: 0, y: 6 },
-        { opacity: 1, y: 0, duration: 0.4, delay: delay + 0.89 });
-    });
-  }, []);
-
-  const colorOf = (it) => it.isOver ? "#DC2626" : it.isAmber ? "#D97706" : "#1D4ED8";
-
-  function calloutFor(item) {
-    const { key, d, isOver, pct } = item;
-    const pctN = parseFloat(pct);
-    if (key === "fy2324") {
-      if (d.totalExp === 0 || pctN < 0.1) {
-        return {
-          headline: "No expenditure recorded",
-          body: `FY 2023–24 was Prop 28's launch year. Programs were newly established and funds were carried forward, establishing the baseline allocation of ${fmt$(d.allocation)}.`,
-          accent: "#64748B",
-        };
-      }
-      return {
-        headline: `${pct}% utilized · ${fmt$(d.totalExp)} expended`,
-        body: `${fmt$(d.allocation)} was allocated for the launch year. Initial expenditures covered early staffing contracts and first-year supply purchases.`,
-        accent: pctN > 88 ? "#D97706" : "#64748B",
-      };
-    }
-    if (key === "fy2425") {
-      if (isOver) {
-        return {
-          headline: `Over budget by ${fmt$(d.totalExp - d.allocation)}`,
-          body: `Expenditure of ${fmt$(d.totalExp)} exceeded the ${fmt$(d.allocation)} annual allocation. The school drew on prior-year reserves or supplemental sources to cover the overage.`,
-          accent: "#DC2626",
-        };
-      }
-      return {
-        headline: `${pct}% utilized · ${fmt$(d.totalExp)} expended`,
-        body: `Spending grew significantly from the prior year as arts programs reached full operation. ${fmt$(d.allocation - d.totalExp)} remained unspent.`,
-        accent: pctN > 88 ? "#D97706" : "#1D4ED8",
-      };
-    }
-    if (isOver) {
-      return {
-        headline: `Over budget by ${fmt$(d.totalExp - d.allocation)}`,
-        body: `Current-year spending of ${fmt$(d.totalExp)} has already exceeded the ${fmt$(d.allocation)} allocation, reflecting strong program activity through May 2026.`,
-        accent: "#DC2626",
-      };
-    }
-    if (pctN < 10) {
-      return {
-        headline: `${pct}% utilized so far`,
-        body: `Only ${fmt$(d.totalExp)} of the ${fmt$(d.allocation)} allocation has been expended through May 2026. Significant funds remain available for staffing and supplies in the second half of the fiscal year.`,
-        accent: "#1D4ED8",
-      };
-    }
-    return {
-      headline: `${pct}% utilized · ${fmt$(d.totalExp)} expended`,
-      body: `${fmt$(d.allocation - d.totalExp)} remains available through June 2026. ${pctN > 80 ? "The budget is nearing full utilization — strong arts program activity this year." : "Funds continue to be deployed for staffing and instructional supplies."}`,
-      accent: "#1D4ED8",
-    };
-  }
-
-  const gsapReady = typeof gsap !== "undefined";
-
-  return (
-    <div>
-      <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:"auto", display:"block" }}>
-        {/* Legend */}
-        <g transform={`translate(${padL}, 16)`}>
-          <rect x={0}   y={-9} width={11} height={11} rx={2} fill="#94A3B8" />
-          <text x={17}  y={0}  style={{ fontSize:11, fill:"#64748B", fontWeight:600 }}>Allocated</text>
-          <rect x={86}  y={-9} width={11} height={11} rx={2} fill="#1D4ED8" />
-          <text x={103} y={0}  style={{ fontSize:11, fill:"#64748B", fontWeight:600 }}>Expended</text>
-          <rect x={178} y={-9} width={11} height={11} rx={2} fill="#DC2626" />
-          <text x={195} y={0}  style={{ fontSize:11, fill:"#64748B", fontWeight:600 }}>Over budget</text>
-        </g>
-
-        {/* Gridlines + Y-axis labels */}
-        {gridFracs.map((f, idx) => {
-          const y = baseY - (rawMax * f / maxVal) * chartH;
-          return (
-            <g key={`grid-${idx}`}>
-              <line x1={padL} x2={W - padR} y1={y} y2={y} stroke="#E2E8F0" strokeDasharray="3,3" />
-              <text x={padL - 10} y={y + 4} textAnchor="end"
-                style={{ fontSize:11, fill:"#94A3B8", fontFamily:"ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                {fmt$(rawMax * f)}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Baseline */}
-        <line x1={padL} x2={W - padR} y1={baseY} y2={baseY} stroke="#CBD5E1" strokeWidth={1.5} />
-
-        {/* Bars + dollar labels per year group */}
-        {items.map((it) => {
-          const groupX = padL + it.i * groupW;
-          const barsStartX = groupX + (groupW - barW * 2 - barGap) / 2;
-          const xAlloc = barsStartX;
-          const xExp   = barsStartX + barW + barGap;
-          const ah = (it.d.allocation / maxVal) * chartH;
-          const eh = (it.d.totalExp   / maxVal) * chartH;
-          const yA = baseY - Math.max(ah, 2);
-          const yE = baseY - Math.max(eh, 2);
-          const expColor = colorOf(it);
-          return (
-            <g key={it.key}>
-              {/* Allocation bar */}
-              <rect ref={el => { if (el) refs.current[`${it.key}-alloc`] = el; }}
-                x={xAlloc}
-                y={gsapReady ? baseY : yA}
-                width={barW}
-                height={gsapReady ? 0 : Math.max(ah, 2)}
-                rx={5} fill="#94A3B8" />
-              {/* Expended bar (only if expenditure exists) */}
-              {it.d.totalExp > 0 && (
-                <rect ref={el => { if (el) refs.current[`${it.key}-exp`] = el; }}
-                  x={xExp}
-                  y={gsapReady ? baseY : yE}
-                  width={barW}
-                  height={gsapReady ? 0 : Math.max(eh, 2)}
-                  rx={5} fill={expColor} />
-              )}
-              {/* Allocation dollar label */}
-              <text ref={el => { if (el) refs.current[`${it.key}-allocLabel`] = el; }}
-                x={xAlloc + barW/2} y={yA - 10} textAnchor="middle"
-                style={{ fontSize:12, fontWeight:700, fill:"#0B1B33",
-                  fontFamily:"ui-monospace, SFMono-Regular, Menlo, monospace",
-                  opacity: gsapReady ? 0 : 1 }}>
-                {fmt$(it.d.allocation)}
-              </text>
-              {/* Expended dollar label */}
-              {it.d.totalExp > 0 && (
-                <text ref={el => { if (el) refs.current[`${it.key}-expLabel`] = el; }}
-                  x={xExp + barW/2} y={yE - 10} textAnchor="middle"
-                  style={{ fontSize:12, fontWeight:700, fill: expColor,
-                    fontFamily:"ui-monospace, SFMono-Regular, Menlo, monospace",
-                    opacity: gsapReady ? 0 : 1 }}>
-                  {fmt$(it.d.totalExp)}
-                </text>
-              )}
-              {/* Zero-spend placeholder */}
-              {it.d.totalExp === 0 && (
-                <text x={xExp + barW/2} y={baseY - 6} textAnchor="middle"
-                  style={{ fontSize:10, fill:"#94A3B8",
-                    fontFamily:"ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                  $0
-                </text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
-
-      {/* Year labels + tag pills — HTML beneath SVG, aligned to bar groups */}
-      <div style={{ display:"flex",
-        paddingLeft:`${(padL/W)*100}%`, paddingRight:`${(padR/W)*100}%`, marginTop:10 }}>
-        {items.map((it) => (
-          <div key={it.key} style={{ flex:1, textAlign:"center" }}>
-            <div style={{ fontSize:13, fontWeight:700, color:"var(--navy)", marginBottom:6 }}>{it.label}</div>
-            <span style={{ display:"inline-block", fontSize:9, fontWeight:700, letterSpacing:".06em",
-              textTransform:"uppercase", color:it.tagFg, background:it.tagBg, padding:"3px 10px", borderRadius:99 }}>
-              {it.tag}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Callout cards */}
-      <div style={{ display:"flex", gap:16, marginTop:20 }}>
-        {items.map((it) => {
-          const c = calloutFor(it);
-          return (
-            <div key={it.key} className="fade-up" style={{
-              flex:1,
-              animationDelay: `${1.0 + it.i * 0.22}s`,
-              background:"#FFFFFF",
-              border:`2px solid ${c.accent}`,
-              borderRadius:14,
-              padding:"16px 18px",
-              boxShadow:"0 6px 22px rgba(11,27,51,.06)",
-            }}>
-              <div style={{ width:28, height:4, background:c.accent, borderRadius:2, marginBottom:10 }} />
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
-                <span style={{ fontSize:13, fontWeight:800, color:"var(--ink)" }}>{it.label}</span>
-                <span style={{ fontSize:9, fontWeight:700, letterSpacing:".06em", textTransform:"uppercase",
-                  color:it.tagFg, background:it.tagBg, padding:"3px 9px", borderRadius:99 }}>{it.tag}</span>
-              </div>
-              {c.headline && (
-                <div style={{ fontSize:11, fontWeight:700, color:c.accent, marginBottom:6 }}>{c.headline}</div>
-              )}
-              <div style={{ fontSize:12, color:"#334155", lineHeight:1.6 }}>{c.body}</div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 function Dashboard({ schoolId, schoolIds, onSchoolChange, user, onSignOut }) {
   const school = SCHOOLS[schoolId];
@@ -1130,21 +851,10 @@ function Dashboard({ schoolId, schoolIds, onSchoolChange, user, onSignOut }) {
         </div>
       </div>
 
-      <div className="mx-auto px-10 pb-4" style={{ maxWidth:CONTAINER }}>
-        <div style={{ borderTop:"1px solid var(--line)", paddingTop:20, marginBottom:20 }}>
-          <div style={{ marginBottom:16 }}>
-            <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", letterSpacing:"-.01em" }}>
-              Animated Budget Overview
-            </div>
-            <div style={{ fontSize:11, color:"var(--muted)", marginTop:2 }}>
-              Allocation vs. expenditure — all three fiscal years
-            </div>
-          </div>
-          <BudgetSVGChart key={school.id} school={school} />
-        </div>
-        <div style={{ fontSize:11, color:"var(--muted)", display:"flex", alignItems:"center", gap:6, paddingBottom:24 }}>
+      <div className="mx-auto px-10 pb-6" style={{ maxWidth:CONTAINER }}>
+        <div style={{ fontSize:11, color:"var(--muted)", display:"flex", alignItems:"center", gap:6, paddingBottom:8 }}>
           <I name="Info" size={11} />
-          Figures accurate as of {DATA_DATE} · Official Prop 28 allocation spreadsheets · 80% staffing / 20% supplies
+          Figures accurate as of {DATA_DATE} · Prop 28 allocation spreadsheets · 80% staffing / 20% supplies
         </div>
       </div>
     </div>
