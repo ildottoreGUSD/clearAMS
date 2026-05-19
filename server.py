@@ -224,8 +224,6 @@ def admin_delete_user(email):
 
 # ── Static files ───────────────────────────────────────────────────────────────
 
-PLAYER_DIR = os.path.join(BASE_DIR, "remotion-viz", "dist")
-
 @app.route("/")
 def index():
     return send_from_directory(BASE_DIR, "ClearAMS Dashboard.html")
@@ -234,17 +232,6 @@ def index():
 @app.route("/admin")
 def admin_panel():
     return send_from_directory(BASE_DIR, "admin.html")
-
-
-@app.route("/player")
-@app.route("/player/")
-def player_page():
-    return send_from_directory(PLAYER_DIR, "player.html")
-
-
-@app.route("/player/<path:filename>")
-def player_static(filename):
-    return send_from_directory(PLAYER_DIR, filename)
 
 
 @app.route("/<path:filename>")
@@ -258,11 +245,12 @@ if __name__ == "__main__":
     if not os.path.exists(USERS_FILE):
         save_users({})
 
+    port = int(os.environ.get("PORT", 8080))
     print("=" * 60)
     print("  ClearAMS Server")
-    print(f"  Dashboard : http://localhost:8080/")
-    print(f"  Admin     : http://localhost:8080/admin")
+    print(f"  Dashboard : http://localhost:{port}/")
+    print(f"  Admin     : http://localhost:{port}/admin")
     print(f"  Admin key : {ADMIN_KEY}")
     print("=" * 60)
 
-    app.run(host="0.0.0.0", port=8080, debug=False)
+    app.run(host="0.0.0.0", port=port, debug=False)
