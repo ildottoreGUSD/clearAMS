@@ -1,5 +1,10 @@
 # Dev Log
 
+## 2026-05-19 (continued 10)
+- Added Railway deployment config: requirements.txt (flask, bcrypt, gunicorn), Procfile (gunicorn --workers 1), PORT env var in server.py, removed dead Remotion player routes from server.py, added __pycache__ to .gitignore.
+- Removed Claude co-authorship from all 46 commits (git filter-repo + force push).
+- Railway had a major outage on deploy day. Switching to Fly.io — setup deferred to next session.
+
 ## 2026-05-19 (continued 9)
 - Added spending pace indicator to FY 2025–26 column: compares % utilized against the fraction of the fiscal year elapsed (July–June window) and shows "On track," "Ahead of pace," or "Behind pace" pill below the usage bar.
 - Added year-over-year allocation delta (▲/▼ vs prior year) beneath the Starting Allocation number on each year column.
