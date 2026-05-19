@@ -392,38 +392,11 @@ const FY2425_AVAILABLE_BALANCE = {
 const STAFFING_ACCENT = "#13315C";
 const SUPPLIES_ACCENT = "#3E7BFA";
 
-// ── ClearAMS logo: laptop with music notation on screen ───────────────────────
+// ── ClearAMS logo ─────────────────────────────────────────────────────────────
 function ClearAMSLogo({ height = 48, style: extraStyle }) {
-  const w = Math.round(height * 80 / 56);
   return (
-    <svg viewBox="0 0 80 56" width={w} height={height} xmlns="http://www.w3.org/2000/svg"
-      style={{ flexShrink:0, display:"block", ...extraStyle }} aria-label="ClearAMS">
-      {/* Lid / screen housing */}
-      <rect x="5" y="1" width="70" height="43" rx="4" fill="#C8C8D0" stroke="#9898A8" strokeWidth="1"/>
-      {/* Screen */}
-      <rect x="8" y="4" width="64" height="37" rx="2" fill="#12102A"/>
-      {/* Staff lines */}
-      <g stroke="white" strokeWidth="0.75" opacity="0.55">
-        <line x1="13" y1="17" x2="67" y2="17"/>
-        <line x1="13" y1="21" x2="67" y2="21"/>
-        <line x1="13" y1="25" x2="67" y2="25"/>
-        <line x1="13" y1="29" x2="67" y2="29"/>
-        <line x1="13" y1="33" x2="67" y2="33"/>
-      </g>
-      {/* Beamed eighth notes in gold */}
-      <ellipse cx="24" cy="29" rx="4" ry="3" fill="#F5C020" transform="rotate(-20 24 29)"/>
-      <line x1="27.5" y1="27" x2="27.5" y2="13" stroke="#F5C020" strokeWidth="1.8"/>
-      <ellipse cx="36" cy="26" rx="4" ry="3" fill="#F5C020" transform="rotate(-20 36 26)"/>
-      <line x1="39.5" y1="24" x2="39.5" y2="11" stroke="#F5C020" strokeWidth="1.8"/>
-      <line x1="27.5" y1="13" x2="39.5" y2="11" stroke="#F5C020" strokeWidth="3"/>
-      {/* Treble clef hint (simplified) */}
-      <text x="50" y="33" fontSize="22" fill="#F5C020" opacity="0.85"
-        fontFamily="serif" fontStyle="italic">♪</text>
-      {/* Base */}
-      <rect x="1" y="44" width="78" height="9" rx="3" fill="#B8B8C2" stroke="#9898A8" strokeWidth="1"/>
-      {/* Trackpad */}
-      <rect x="27" y="46" width="26" height="5" rx="2.5" fill="#A8A8B4" stroke="#9898A8" strokeWidth="0.6"/>
-    </svg>
+    <img src="/vapa-icon-clean.png" alt="ClearAMS"
+      style={{ height, width:"auto", flexShrink:0, display:"block", ...extraStyle }} />
   );
 }
 
@@ -966,9 +939,9 @@ function Dashboard({ schoolId, schoolIds, onSchoolChange, user, onSignOut }) {
       </header>
 
       {/* ── VAPA hero image ──────────────────────────────────────────────────── */}
-      <div style={{ width:"100%", height:380, overflow:"hidden", background:"#f5f5f7" }}>
+      <div style={{ width:"100%", height:560, overflow:"hidden", background:"#f5f5f7" }}>
         <img src="/vapa-icon-clean.png" alt="Visual and Performing Arts"
-          style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"center 30%", display:"block" }}/>
+          style={{ width:"100%", height:"100%", objectFit:"cover", objectPosition:"center 35%", display:"block" }}/>
       </div>
 
       <div ref={bodyRef} className="mx-auto px-10 pt-10 pb-6" style={{ maxWidth:CONTAINER }}>
