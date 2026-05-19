@@ -1,5 +1,9 @@
 # Dev Log
 
+## 2026-05-19 (continued 2)
+- Removed Gemini sparkle watermark from Gemini_Generated_Image_wkpbolwkpbolwkpb.png by cloning the clean dark background from below the sparkle region (x=1315-1407, y=665-735). Promoted this image to vapa-icon-clean.png (replaces the previous sketch-style artwork).
+- Budget overview chart: reversed CHART_YEARS order so FY 2025–26 (Live · Current) renders leftmost and animates first; FY 2023–24 (Launch Year) is now rightmost.
+
 ## 2026-05-19 (continued)
 - Reworked VAPA hero image layout: login page now shows the full image (no cropping) centered at 400px width, just wider than the 360px sign-in form. Dashboard hero strip removed entirely (was full-width 110px background-cover — too large and cropped).
 - Fixed Pillow watermark-removal patch on vapa-icon-clean.png: repainted grey (185,189,192) rectangle at bottom-right corner with white to match the illustration's paper background.
