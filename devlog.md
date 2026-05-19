@@ -1,5 +1,9 @@
 # Dev Log
 
+## 2026-05-19 (continued 6)
+- Added Site Expenditure Plan links to each year column header. Extracted 30 plan files (.docx/.pdf) from zip into plans/. SITE_PLANS lookup maps school ID + fiscal year to filename; link renders as "📄 Site Expenditure Plan" beneath the FY label and opens in a new tab. 27 of 33 schools have a 25-26 plan; Clark, Marshall, Mountain Ave, Cloud, and Jewel City have no file yet. Fixed a variable ordering bug (key was undefined when planFile was computed) that prevented all links from rendering.
+- Removed FY 2023-24 year column and bar from the budget overview chart. All fy2324 data remains in the SCHOOLS object for future calculations.
+
 ## 2026-05-19 (continued 5)
 - Clarified column U logic: FY2425_AVAILABLE_BALANCE replaces the displayed Remaining figure for FY 2024–25 only — it is not added to the allocation. Allocation totals and bar charts are unaffected.
 - Added prior-year overage warning to the FY 2025–26 Remaining cell: when a school's FY 2024–25 column U balance is negative, a yellow "⚠ Prior Year Overage" badge appears. Clicking it opens a modal showing the overage amount and a disclaimer that no debit has been applied to the displayed figures. Currently triggers for Columbus (−$39,290.28); logic is data-driven and will apply automatically to any future negative column U values.
