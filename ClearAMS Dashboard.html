@@ -528,7 +528,8 @@ function BudgetBar({ label, share, budget, expended, accent, schoolKey, yearKey,
 }
 
 // ── Year column ───────────────────────────────────────────────────────────────
-function WaiverModal({ onClose }) {
+function WaiverModal({ yearKey, onClose }) {
+  const is2425 = yearKey === "fy2425";
   return (
     <div onClick={onClose} style={{
       position:"fixed", inset:0, zIndex:1000,
@@ -543,37 +544,40 @@ function WaiverModal({ onClose }) {
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:22 }}>
           <div>
             <div style={{ fontSize:10, fontWeight:700, letterSpacing:".08em", textTransform:"uppercase", color:"#1D4ED8", marginBottom:4 }}>Prop 28</div>
-            <div style={{ fontSize:17, fontWeight:700, color:"var(--ink)", lineHeight:1.2 }}>CDE Waiver Allowances</div>
+            <div style={{ fontSize:17, fontWeight:700, color:"var(--ink)", lineHeight:1.2 }}>
+              {is2425 ? "2024–25" : "2025–26"} Waiver Allowance
+            </div>
           </div>
           <button onClick={onClose} style={{ border:"none", background:"#F1F5F9", borderRadius:99, width:30, height:30, fontSize:16, cursor:"pointer", color:"var(--muted)", flexShrink:0, marginLeft:16 }}>×</button>
         </div>
 
-        {/* 2024-25 */}
-        <div style={{ marginBottom:22 }}>
-          <div style={{ display:"inline-block", fontSize:9, fontWeight:700, letterSpacing:".06em", textTransform:"uppercase", color:"#92400E", background:"#FEF3C7", padding:"3px 10px", borderRadius:99, marginBottom:10 }}>2024–25 Waiver Allowance</div>
-          <p style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.65, margin:"0 0 10px" }}>
-            The CDE approved altering the 80/20 rule for this year. More than 20% of funds can go toward non-certified staffing support. This waiver specifically allows the district to:
-          </p>
-          <ul style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.75, paddingLeft:20, margin:0 }}>
-            <li>Partner with community arts organizations.</li>
-            <li>Fund residencies with professional artists.</li>
-            <li>Provide specialized discipline instruction.</li>
-            <li>Deliver artist-led masterclasses and workshops.</li>
-          </ul>
-        </div>
-
-        <div style={{ borderTop:"1px solid var(--line)", paddingTop:22 }}>
-          <div style={{ display:"inline-block", fontSize:9, fontWeight:700, letterSpacing:".06em", textTransform:"uppercase", color:"#1e40af", background:"#DBEAFE", padding:"3px 10px", borderRadius:99, marginBottom:10 }}>2025–26 Waiver Allowance</div>
-          <p style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.65, margin:"0 0 10px" }}>
-            The CDE approved altering the 80/20 rule for this year too. More than 20% of funds can buy materials and equipment. This waiver specifically allows the district to:
-          </p>
-          <ul style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.75, paddingLeft:20, margin:0 }}>
-            <li>Leverage external professional arts partnerships.</li>
-            <li>Upgrade physical stage infrastructure and lighting.</li>
-            <li>Modernize acoustic settings and audio technology.</li>
-            <li>Procure digital media studio materials.</li>
-          </ul>
-        </div>
+        {is2425 ? (
+          <>
+            <div style={{ display:"inline-block", fontSize:9, fontWeight:700, letterSpacing:".06em", textTransform:"uppercase", color:"#92400E", background:"#FEF3C7", padding:"3px 10px", borderRadius:99, marginBottom:14 }}>2024–25 Waiver Allowance</div>
+            <p style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.65, margin:"0 0 10px" }}>
+              The CDE approved altering the 80/20 rule for this year. More than 20% of funds can go toward non-certified staffing support. This waiver specifically allows the district to:
+            </p>
+            <ul style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.75, paddingLeft:20, margin:0 }}>
+              <li>Partner with community arts organizations.</li>
+              <li>Fund residencies with professional artists.</li>
+              <li>Provide specialized discipline instruction.</li>
+              <li>Deliver artist-led masterclasses and workshops.</li>
+            </ul>
+          </>
+        ) : (
+          <>
+            <div style={{ display:"inline-block", fontSize:9, fontWeight:700, letterSpacing:".06em", textTransform:"uppercase", color:"#1e40af", background:"#DBEAFE", padding:"3px 10px", borderRadius:99, marginBottom:14 }}>2025–26 Waiver Allowance</div>
+            <p style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.65, margin:"0 0 10px" }}>
+              The CDE approved altering the 80/20 rule for this year too. More than 20% of funds can buy materials and equipment. This waiver specifically allows the district to:
+            </p>
+            <ul style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.75, paddingLeft:20, margin:0 }}>
+              <li>Leverage external professional arts partnerships.</li>
+              <li>Upgrade physical stage infrastructure and lighting.</li>
+              <li>Modernize acoustic settings and audio technology.</li>
+              <li>Procure digital media studio materials.</li>
+            </ul>
+          </>
+        )}
       </div>
     </div>
   );
@@ -679,7 +683,7 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
             )}
           </div>
         </div>
-        {showWaiver && <WaiverModal onClose={() => setShowWaiver(false)} />}
+        {showWaiver && <WaiverModal yearKey={key} onClose={() => setShowWaiver(false)} />}
         <div style={{ padding:"10px 20px 16px", borderTop:"1px solid var(--line)" }}>
           <div style={{ height:7, background:"#EDF0F5", borderRadius:999, overflow:"hidden" }}>
             <div ref={fillRef} style={{
