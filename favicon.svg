@@ -1,230 +1,58 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <clipPath id="c"><rect width="512" height="512" rx="96"/></clipPath>
-
-    <!-- California sunset sky: deep purple → berry → burnt orange → gold -->
-    <linearGradient id="bg" x1="0.15" y1="0" x2="0.85" y2="1">
-      <stop offset="0%"   stop-color="#090318"/>
-      <stop offset="28%"  stop-color="#260740"/>
-      <stop offset="54%"  stop-color="#881948"/>
-      <stop offset="78%"  stop-color="#C84C18"/>
-      <stop offset="100%" stop-color="#F0A020"/>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A0E1A" />
+      <stop offset="100%" stop-color="#151B2C" />
+    </linearGradient>
+    
+    <linearGradient id="cGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F2FE" />
+      <stop offset="100%" stop-color="#4FACFE" />
     </linearGradient>
 
-    <!-- Stage glow from bottom center -->
-    <radialGradient id="sg" cx="50%" cy="100%" r="70%">
-      <stop offset="0%"   stop-color="#FFD050" stop-opacity="0.6"/>
-      <stop offset="45%"  stop-color="#FF8820" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#FF8820" stop-opacity="0"/>
-    </radialGradient>
-
-    <!-- Vignette -->
-    <radialGradient id="vg" cx="50%" cy="50%" r="70%">
-      <stop offset="0%"   stop-color="#000" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#000" stop-opacity="0.38"/>
-    </radialGradient>
-
-    <!-- Comedy mask: warm cream-to-gold -->
-    <linearGradient id="cg" x1="0.2" y1="0" x2="0.4" y2="1">
-      <stop offset="0%"   stop-color="#FFFBC0"/>
-      <stop offset="40%"  stop-color="#F5D040"/>
-      <stop offset="100%" stop-color="#C08818"/>
+    <linearGradient id="checkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#34D399" />
     </linearGradient>
-
-    <!-- Tragedy mask: amber-to-deep gold -->
-    <linearGradient id="tg" x1="0.7" y1="0" x2="0.3" y2="1">
-      <stop offset="0%"   stop-color="#FFE880"/>
-      <stop offset="40%"  stop-color="#E8C028"/>
-      <stop offset="100%" stop-color="#A06808"/>
+    
+    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.03" />
     </linearGradient>
-
-    <!-- Poppy petals: bright coral to deep red -->
-    <radialGradient id="pg" cx="35%" cy="25%" r="80%">
-      <stop offset="0%"   stop-color="#FF9858"/>
-      <stop offset="60%"  stop-color="#E83010"/>
-      <stop offset="100%" stop-color="#9C1800"/>
-    </radialGradient>
-
-    <!-- Mask drop shadow -->
-    <filter id="ms" x="-25%" y="-20%" width="150%" height="150%">
-      <feDropShadow dx="0" dy="8" stdDeviation="13" flood-color="#050010" flood-opacity="0.68"/>
+    
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
     </filter>
-    <!-- Poppy drop shadow -->
-    <filter id="ps" x="-40%" y="-40%" width="180%" height="180%">
-      <feDropShadow dx="0" dy="4" stdDeviation="7" flood-color="#500000" flood-opacity="0.55"/>
-    </filter>
-    <!-- Brush drop shadow -->
-    <filter id="bs" x="-40%" y="-20%" width="180%" height="150%">
-      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000" flood-opacity="0.4"/>
+
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000000" flood-opacity="0.55" />
     </filter>
   </defs>
 
-  <g clip-path="url(#c)">
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
 
-    <!-- ── Background ──────────────────────────────────────── -->
-    <rect width="512" height="512" fill="url(#bg)"/>
+  <g opacity="0.03" stroke="#FFFFFF" stroke-width="2">
+    <line x1="128" y1="0" x2="128" y2="512" />
+    <line x1="256" y1="0" x2="256" y2="512" />
+    <line x1="384" y1="0" x2="384" y2="512" />
+    <line x1="0" y1="128" x2="512" y2="128" />
+    <line x1="0" y1="256" x2="512" y2="256" />
+    <line x1="0" y1="384" x2="512" y2="384" />
+  </g>
 
-    <!-- Stage glow from below -->
-    <rect width="512" height="512" fill="url(#sg)"/>
+  <g>
+    <path d="M 369 143 A 160 160 0 1 0 369 369" fill="none" stroke="url(#cGrad)" stroke-width="32" stroke-linecap="round" filter="url(#glow)" />
+    
+    <path d="M 175 345 L 256 155 L 337 345" fill="none" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
 
-    <!-- ── Sunburst / stage lighting rays ─────────────────── -->
-    <g fill="#FFE070" opacity="0.075">
-      <polygon points="256,526 204,372 308,372"/>
-      <polygon points="256,526 146,358 230,355"/>
-      <polygon points="256,526 80,385 170,358"/>
-      <polygon points="256,526 38,428 132,400"/>
-      <polygon points="256,526 316,355 400,362"/>
-      <polygon points="256,526 366,358 450,382"/>
-      <polygon points="256,526 444,420 502,450"/>
-    </g>
+  <circle cx="256" cy="256" r="125" fill="url(#glassGrad)" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="1.5" />
 
-    <!-- ── Night sky: stars ────────────────────────────────── -->
-    <g fill="white">
-      <circle cx="50"  cy="36"  r="1.8" opacity="0.9"/>
-      <circle cx="116" cy="20"  r="2.2" opacity="0.85"/>
-      <circle cx="188" cy="50"  r="1.2" opacity="0.7"/>
-      <circle cx="258" cy="26"  r="1.8" opacity="0.9"/>
-      <circle cx="332" cy="42"  r="1.3" opacity="0.65"/>
-      <circle cx="398" cy="18"  r="2.1" opacity="0.8"/>
-      <circle cx="466" cy="54"  r="1.6" opacity="0.7"/>
-      <circle cx="70"  cy="86"  r="1.3" opacity="0.5"/>
-      <circle cx="165" cy="96"  r="1.7" opacity="0.6"/>
-      <circle cx="308" cy="74"  r="1.3" opacity="0.75"/>
-      <circle cx="438" cy="92"  r="1.6" opacity="0.6"/>
-      <circle cx="40"  cy="148" r="1.1" opacity="0.4"/>
-      <circle cx="490" cy="132" r="1.3" opacity="0.5"/>
-      <circle cx="234" cy="110" r="2.1" opacity="0.7"/>
-      <circle cx="374" cy="126" r="1.3" opacity="0.5"/>
-      <circle cx="144" cy="138" r="1.1" opacity="0.45"/>
-      <circle cx="484" cy="68"  r="1.1" opacity="0.55"/>
-      <circle cx="22"  cy="72"  r="1.3" opacity="0.55"/>
-    </g>
-    <!-- 4-point star sparkles -->
-    <g transform="translate(116, 58)" fill="white" opacity="0.74">
-      <polygon points="0,-9 2,-2 9,0 2,2 0,9 -2,2 -9,0 -2,-2"/>
-    </g>
-    <g transform="translate(396, 38)" fill="white" opacity="0.6">
-      <polygon points="0,-6 1.4,-1.4 6,0 1.4,1.4 0,6 -1.4,1.4 -6,0 -1.4,-1.4"/>
-    </g>
-
-    <!-- ── Music staff lines (subtle, lower area) ─────────── -->
-    <g stroke="#FFD060" stroke-opacity="0.1" stroke-width="1.5">
-      <line x1="18" y1="330" x2="494" y2="330"/>
-      <line x1="18" y1="342" x2="494" y2="342"/>
-      <line x1="18" y1="354" x2="494" y2="354"/>
-      <line x1="18" y1="366" x2="494" y2="366"/>
-      <line x1="18" y1="378" x2="494" y2="378"/>
-    </g>
-
-    <!-- ── Tragedy Mask (drawn first / behind) ────────────── -->
-    <g transform="rotate(12, 322, 268)" filter="url(#ms)">
-      <!-- Face -->
-      <ellipse cx="322" cy="268" rx="97" ry="115" fill="url(#tg)" stroke="#9C6808" stroke-width="4"/>
-      <!-- Eyes -->
-      <ellipse cx="293" cy="243" rx="18" ry="13" fill="#160828"/>
-      <ellipse cx="351" cy="245" rx="18" ry="13" fill="#160828"/>
-      <!-- Eyebrows angled inward/down (sorrow) -->
-      <path d="M274,223 Q293,236 312,229" stroke="#7A5208" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-      <path d="M334,227 Q352,238 369,225" stroke="#7A5208" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-      <!-- Frown -->
-      <path d="M281,309 Q322,281 362,309" stroke="#7A5208" stroke-width="7" fill="none" stroke-linecap="round"/>
-      <!-- Teardrop -->
-      <ellipse cx="288" cy="264" rx="6" ry="9" fill="#3870C0" opacity="0.88"/>
-      <!-- Nose -->
-      <path d="M319,268 Q315,278 322,284 Q329,278 325,268" stroke="#9C6808" stroke-width="2" fill="none" opacity="0.55"/>
-    </g>
-
-    <!-- ── Comedy Mask (drawn second / in front) ──────────── -->
-    <g transform="rotate(-15, 190, 226)" filter="url(#ms)">
-      <!-- Face -->
-      <ellipse cx="190" cy="226" rx="97" ry="115" fill="url(#cg)" stroke="#C09018" stroke-width="4"/>
-      <!-- Eyes -->
-      <ellipse cx="161" cy="202" rx="18" ry="13" fill="#160828"/>
-      <ellipse cx="219" cy="198" rx="18" ry="13" fill="#160828"/>
-      <!-- Eyebrows raised (joy) -->
-      <path d="M142,184 Q161,170 181,177" stroke="#8C5808" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-      <path d="M205,175 Q224,163 244,170" stroke="#8C5808" stroke-width="5.5" fill="none" stroke-linecap="round"/>
-      <!-- Smile -->
-      <path d="M150,254 Q190,292 230,254" stroke="#8C5808" stroke-width="7" fill="none" stroke-linecap="round"/>
-      <!-- Nose -->
-      <path d="M187,224 Q183,234 190,240 Q197,234 193,224" stroke="#C09018" stroke-width="2" fill="none" opacity="0.55"/>
-    </g>
-
-    <!-- ── California Poppies ──────────────────────────────── -->
-    <!-- Left poppy -->
-    <g transform="translate(80, 436)" filter="url(#ps)">
-      <!-- Back petals (45° diagonals, smaller) -->
-      <g fill="url(#pg)" opacity="0.78">
-        <path d="M0,4 C-13,-5 -12,-26 0,-34 C12,-26 13,-5 0,4 Z" transform="rotate(45)"/>
-        <path d="M0,4 C-13,-5 -12,-26 0,-34 C12,-26 13,-5 0,4 Z" transform="rotate(135)"/>
-        <path d="M0,4 C-13,-5 -12,-26 0,-34 C12,-26 13,-5 0,4 Z" transform="rotate(225)"/>
-        <path d="M0,4 C-13,-5 -12,-26 0,-34 C12,-26 13,-5 0,4 Z" transform="rotate(315)"/>
-      </g>
-      <!-- Main petals (cardinal directions, larger) -->
-      <g fill="url(#pg)">
-        <path d="M0,5 C-21,-8 -19,-40 0,-53 C19,-40 21,-8 0,5 Z"/>
-        <path d="M0,5 C-21,-8 -19,-40 0,-53 C19,-40 21,-8 0,5 Z" transform="rotate(90)"/>
-        <path d="M0,5 C-21,-8 -19,-40 0,-53 C19,-40 21,-8 0,5 Z" transform="rotate(180)"/>
-        <path d="M0,5 C-21,-8 -19,-40 0,-53 C19,-40 21,-8 0,5 Z" transform="rotate(270)"/>
-      </g>
-      <!-- Center disc -->
-      <circle cx="0" cy="0" r="13" fill="#1C0800"/>
-      <circle cx="0" cy="0" r="7.5" fill="#F5C018"/>
-      <circle cx="-3" cy="-3" r="2" fill="#FFDF60"/>
-      <circle cx="3.5" cy="-2" r="2" fill="#FFDF60"/>
-      <circle cx="0"  cy="3.5" r="2" fill="#FFDF60"/>
-    </g>
-
-    <!-- Right poppy (smaller, partially clipped by canvas edge) -->
-    <g transform="translate(438, 455) scale(0.68)" filter="url(#ps)">
-      <g fill="url(#pg)" opacity="0.78">
-        <path d="M0,4 C-13,-5 -12,-26 0,-34 C12,-26 13,-5 0,4 Z" transform="rotate(45)"/>
-        <path d="M0,4 C-13,-5 -12,-26 0,-34 C12,-26 13,-5 0,4 Z" transform="rotate(135)"/>
-        <path d="M0,4 C-13,-5 -12,-26 0,-34 C12,-26 13,-5 0,4 Z" transform="rotate(225)"/>
-        <path d="M0,4 C-13,-5 -12,-26 0,-34 C12,-26 13,-5 0,4 Z" transform="rotate(315)"/>
-      </g>
-      <g fill="url(#pg)">
-        <path d="M0,5 C-21,-8 -19,-40 0,-53 C19,-40 21,-8 0,5 Z"/>
-        <path d="M0,5 C-21,-8 -19,-40 0,-53 C19,-40 21,-8 0,5 Z" transform="rotate(90)"/>
-        <path d="M0,5 C-21,-8 -19,-40 0,-53 C19,-40 21,-8 0,5 Z" transform="rotate(180)"/>
-        <path d="M0,5 C-21,-8 -19,-40 0,-53 C19,-40 21,-8 0,5 Z" transform="rotate(270)"/>
-      </g>
-      <circle cx="0" cy="0" r="13" fill="#1C0800"/>
-      <circle cx="0" cy="0" r="7.5" fill="#F5C018"/>
-    </g>
-
-    <!-- ── Paint brush (upper-right, diagonal) ────────────── -->
-    <g transform="translate(420, 42) rotate(48)" filter="url(#bs)">
-      <!-- Wooden handle -->
-      <rect x="-8" y="0" width="16" height="78" rx="5" fill="#7B3810" stroke="#4A2200" stroke-width="1.5"/>
-      <!-- Ferrule (metal band) -->
-      <rect x="-10" y="74" width="20" height="11" rx="3" fill="#C0C0BA" stroke="#909090" stroke-width="1"/>
-      <!-- Bristles -->
-      <ellipse cx="0" cy="97" rx="10" ry="18" fill="#CC3015"/>
-      <!-- Paint smear / drip -->
-      <path d="M-10,114 Q0,120 11,113 Q7,106 0,106" fill="#CC3015" opacity="0.6"/>
-    </g>
-
-    <!-- ── Beamed eighth-notes (upper-left) ───────────────── -->
-    <g transform="translate(60, 150)" fill="#FFD060" opacity="0.82">
-      <!-- Note head 1 (tilted oval) -->
-      <ellipse cx="0" cy="0" rx="13" ry="9" transform="rotate(-22)"/>
-      <!-- Stem 1 -->
-      <rect x="11" y="-53" width="5" height="53" rx="2.5"/>
-      <!-- Note head 2 -->
-      <ellipse cx="32" cy="-12" rx="13" ry="9"
-               transform="translate(32,-12) rotate(-22) translate(-32,12)"/>
-      <!-- Stem 2 -->
-      <rect x="43" y="-65" width="5" height="53" rx="2.5"/>
-      <!-- Sloped beam connecting stems -->
-      <polygon points="11,-48 16,-48 48,-60 43,-60"/>
-    </g>
-
-    <!-- ── Vignette (depth/framing) ───────────────────────── -->
-    <rect width="512" height="512" fill="url(#vg)"/>
-
-    <!-- ── Golden border ring ─────────────────────────────── -->
-    <rect width="512" height="512" rx="96" fill="none" stroke="#F5C028" stroke-width="7" stroke-opacity="0.44"/>
-
+  <g filter="url(#dropShadow)">
+    <path d="M 209 265 L 265 315 L 385 145" fill="none" stroke="url(#checkGrad)" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" />
   </g>
 </svg>
