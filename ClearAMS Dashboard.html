@@ -527,6 +527,38 @@ function BudgetBar({ label, share, budget, expended, accent, schoolKey, yearKey,
   );
 }
 
+// ── Site Expenditure Plan links (keyed by school ID → fiscal year → filename) ─
+const SITE_PLANS = {
+  hoover:           { fy2526: "Hoover 25-26 Prop 28 Expenditure Plan.docx" },
+  crescenta:        { fy2526: "25-26 Prop 28 Expenditure Plan- CVHS.docx" },
+  glendale:         { fy2526: "Glendale High - 25-26 Prop 28_AMIM Expenditure Plan.docx" },
+  daily:            { fy2324: "Daily 23-24 Prop 28 Expenditure Plan.docx" },
+  roosevelt:        { fy2526: "25-26 Prop 28 Expenditure Plan Roosevelt MS.docx" },
+  rosemont:         { fy2526: "Rosemont 25-26 Prop 28 Expenditure Plan.docx" },
+  toll:             { fy2526: "Toll 25-26 Prop 28 Expenditure Plan.docx" },
+  wilson:           { fy2526: "Wilson 25-26 Prop 28 Expenditure Plan.docx" },
+  balboa:           { fy2526: "Copy of 25-26 Prop 28 Expenditure Plan.Balboa.docx" },
+  cerritos:         { fy2526: "Cerritos 25-26 Prop 28 Expenditure Plan.docx" },
+  columbus:         { fy2526: "Columbus ES VAPA 25-26 Prop 28 Expenditure Plan.docx" },
+  dunsmore:         { fy2526: "Dunsmore 25-26 Prop 28 Expenditure Plan.docx" },
+  edison:           { fy2526: "Edison 25-26 Prop 28 Expenditure Plan.docx" },
+  franklin:         { fy2526: "25-26 Franklin - Prop 28 Expenditure Plan.docx" },
+  fremont:          { fy2526: "Fremont - 25-26 Prop 28 Expenditure Plan.docx" },
+  glenoaks:         { fy2526: "Glenoaks 25-26 Prop 28 Expenditure Plan.docx" },
+  jefferson:        { fy2526: "JEFFERSON 25-26 Prop 28 Expenditure Plan.docx" },
+  keppel:           { fy2526: "KEPPEL 25-26 Prop 28 Expenditure Plan.docx" },
+  lacrescenta:      { fy2526: "25-26 La Crescenta ES Prop 28 Expenditure Plan (2).pdf" },
+  lincoln:          { fy2526: "Lincoln 25-26 Prop 28 Expenditure Plan.docx" },
+  mann:             { fy2526: "Horace Mann 25-26 Prop 28 Expenditure Plan.docx" },
+  montevista:       { fy2526: "25-26 Prop 28 Expenditure Plan- Monte Vista.docx" },
+  muir:             { fy2526: "25-26 Prop 28 Muir Expenditure Plan.docx" },
+  valleyview:       { fy2526: "Valley View 25-26 Prop 28 Expenditure Plan.docx" },
+  verdugowoodlands: { fy2526: "25-26 Prop 28 Expenditure Plan - VERDUGO WOODLANDS.docx" },
+  rdwhite:          { fy2526: "RDW 25-26 Prop 28 Expenditure Plan.docx" },
+  verdugoacademy:   { fy2526: "Verdugo Academy 25-26 Prop 28 Expenditure Plan.docx" },
+  pacificave:       { fy2526: "Pacific Preschool (PAEC)Prop 28 Expenditure Plan.docx" },
+};
+
 // ── Year column ───────────────────────────────────────────────────────────────
 function WaiverModal({ yearKey, onClose }) {
   const is2425 = yearKey === "fy2425";
@@ -588,6 +620,8 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
   const fillRef = useRef(null);
   const [showWaiver, setShowWaiver] = React.useState(false);
   const [showOverageWarn, setShowOverageWarn] = React.useState(false);
+  const planFile = (SITE_PLANS[school.id] || {})[key];
+  const planUrl  = planFile ? `/plans/${encodeURIComponent(planFile)}` : null;
   const fy2425balance = FY2425_AVAILABLE_BALANCE[school.id];
   const priorYearOverage = (key === "fy2526" && typeof fy2425balance === "number" && fy2425balance < 0)
     ? Math.abs(fy2425balance) : null;
@@ -637,8 +671,16 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
     <div ref={colRef} style={{ width:colWidth, flexShrink:0, opacity: typeof gsap !== "undefined" ? 0 : 1 }}>
 
       {/* Year header */}
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:20 }}>
-        <div style={{ fontSize:17, fontWeight:700, color:"var(--ink)", letterSpacing:"-.02em" }}>{label}</div>
+      <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:20 }}>
+        <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+          <div style={{ fontSize:17, fontWeight:700, color:"var(--ink)", letterSpacing:"-.02em" }}>{label}</div>
+          {planUrl && (
+            <a href={planUrl} target="_blank" rel="noreferrer" style={{
+              fontSize:10, fontWeight:700, letterSpacing:".04em", color:"#1D4ED8",
+              textDecoration:"underline", textDecorationColor:"#93C5FD"
+            }}>📄 Site Expenditure Plan</a>
+          )}
+        </div>
         <div style={{ display:"flex", alignItems:"center", gap:6, borderRadius:999, padding:"5px 12px",
           background:sc.bg, fontSize:10.5, fontWeight:600, color:sc.text, flexShrink:0 }}>
           <span className={sc.anim ? "live-dot" : ""} style={{ width:5, height:5, borderRadius:"50%", background:sc.dot, display:"inline-block" }} />
