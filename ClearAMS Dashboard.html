@@ -587,6 +587,10 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
   const colRef  = useRef(null);
   const fillRef = useRef(null);
   const [showWaiver, setShowWaiver] = React.useState(false);
+  const [showOverageWarn, setShowOverageWarn] = React.useState(false);
+  const fy2425balance = FY2425_AVAILABLE_BALANCE[school.id];
+  const priorYearOverage = (key === "fy2526" && typeof fy2425balance === "number" && fy2425balance < 0)
+    ? Math.abs(fy2425balance) : null;
   const { key, label, status } = yearMeta;
   const data       = school[key];
   const isCurrent  = status === "current";
@@ -681,9 +685,48 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
                 textDecorationColor:"#93C5FD"
               }}>Waiver Granted ↗</button>
             )}
+            {priorYearOverage !== null && (
+              <button onClick={() => setShowOverageWarn(true)} style={{
+                display:"inline-flex", alignItems:"center", gap:4, marginTop:8,
+                fontSize:10, fontWeight:700, letterSpacing:".04em",
+                color:"#92400E", background:"#FEF3C7",
+                border:"1px solid #FDE68A", borderRadius:99,
+                padding:"3px 8px", cursor:"pointer"
+              }}>⚠ Prior Year Overage</button>
+            )}
           </div>
         </div>
         {showWaiver && <WaiverModal yearKey={key} onClose={() => setShowWaiver(false)} />}
+        {showOverageWarn && priorYearOverage !== null && (
+          <div onClick={() => setShowOverageWarn(false)} style={{
+            position:"fixed", inset:0, zIndex:1000,
+            background:"rgba(11,27,51,.5)", backdropFilter:"blur(3px)",
+            display:"flex", alignItems:"center", justifyContent:"center", padding:24
+          }}>
+            <div onClick={e => e.stopPropagation()} style={{
+              background:"#fff", borderRadius:18, padding:"28px 32px",
+              maxWidth:460, width:"100%", boxShadow:"0 24px 64px rgba(11,27,51,.22)"
+            }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:18 }}>
+                <div>
+                  <div style={{ fontSize:10, fontWeight:700, letterSpacing:".08em", textTransform:"uppercase", color:"#92400E", marginBottom:4 }}>Notice</div>
+                  <div style={{ fontSize:17, fontWeight:700, color:"var(--ink)", lineHeight:1.2 }}>Prior Year Overage</div>
+                </div>
+                <button onClick={() => setShowOverageWarn(false)} style={{ border:"none", background:"#F1F5F9", borderRadius:99, width:30, height:30, fontSize:16, cursor:"pointer", color:"var(--muted)", flexShrink:0, marginLeft:16 }}>×</button>
+              </div>
+              <div style={{ background:"#FEF3C7", border:"1px solid #FDE68A", borderRadius:10, padding:"14px 16px", marginBottom:16 }}>
+                <div style={{ fontSize:22, fontWeight:700, color:"#92400E", fontFamily:"ui-monospace, SFMono-Regular, Menlo, monospace" }}>−{fmt$(priorYearOverage)}</div>
+                <div style={{ fontSize:11, color:"#92400E", marginTop:3 }}>FY 2024–25 overage (column U)</div>
+              </div>
+              <p style={{ fontSize:13, color:"var(--ink-2)", lineHeight:1.7, margin:0 }}>
+                The FY 2024–25 available balance for this school is in the red by <strong>{fmt$(priorYearOverage)}</strong>. This overage will need to be debited from the FY 2025–26 allocation before funds are committed.
+              </p>
+              <p style={{ fontSize:12, color:"var(--muted)", lineHeight:1.6, marginTop:10 }}>
+                No debit has been applied to these figures. The amounts shown above reflect the allocation and expenditure data as imported.
+              </p>
+            </div>
+          </div>
+        )}
         <div style={{ padding:"10px 20px 16px", borderTop:"1px solid var(--line)" }}>
           <div style={{ height:7, background:"#EDF0F5", borderRadius:999, overflow:"hidden" }}>
             <div ref={fillRef} style={{
