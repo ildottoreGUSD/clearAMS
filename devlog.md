@@ -1,5 +1,9 @@
 # Dev Log
 
+## 2026-05-19 (continued 5)
+- Clarified column U logic: FY2425_AVAILABLE_BALANCE replaces the displayed Remaining figure for FY 2024–25 only — it is not added to the allocation. Allocation totals and bar charts are unaffected.
+- Added prior-year overage warning to the FY 2025–26 Remaining cell: when a school's FY 2024–25 column U balance is negative, a yellow "⚠ Prior Year Overage" badge appears. Clicking it opens a modal showing the overage amount and a disclaimer that no debit has been applied to the displayed figures. Currently triggers for Columbus (−$39,290.28); logic is data-driven and will apply automatically to any future negative column U values.
+
 ## 2026-05-19 (continued 4)
 - Added "Waiver Granted ↗" link to the Remaining field in the FY 2024–25 and FY 2025–26 year columns. Clicking opens a modal (WaiverModal component) showing both CDE waiver allowances: 2024–25 permits non-certified staffing support (community arts orgs, professional residencies, specialized instruction, masterclasses); 2025–26 permits materials and equipment spending (external partnerships, stage infrastructure, audio tech, digital media). Modal closes on overlay click or ×.
 
