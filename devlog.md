@@ -1,5 +1,8 @@
 # Dev Log
 
+## 2026-05-19 (continued 3)
+- Login screen: replaced "Sign in to ClearAMS" heading with the GUSD VAPA Logo.png (120px circular badge, centered). "ClearAMS" now appears beneath it in large serif letters (38px). Description text and sign-in form unchanged.
+
 ## 2026-05-19 (continued 2)
 - Removed Gemini sparkle watermark from Gemini_Generated_Image_wkpbolwkpbolwkpb.png by cloning the clean dark background from below the sparkle region (x=1315-1407, y=665-735). Promoted this image to vapa-icon-clean.png (replaces the previous sketch-style artwork).
 - Budget overview chart: reversed CHART_YEARS order so FY 2025–26 (Live · Current) renders leftmost and animates first; FY 2023–24 (Launch Year) is now rightmost.
