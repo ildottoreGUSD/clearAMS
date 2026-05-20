@@ -15,6 +15,7 @@ import os
 import secrets
 import smtplib
 import ssl
+from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from functools import wraps
@@ -25,6 +26,7 @@ app = Flask(__name__, static_folder=".")
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR    = os.environ.get("DATA_DIR", BASE_DIR)
 USERS_FILE  = os.path.join(DATA_DIR, "users.json")
+PLANS_FILE  = os.path.join(DATA_DIR, "plans.json")
 ADMIN_KEY   = os.environ.get("ADMIN_KEY") or secrets.token_hex(16)
 
 SMTP_HOST     = os.environ.get("SMTP_HOST", "")
@@ -94,6 +96,22 @@ def load_users() -> dict:
 def save_users(users: dict) -> None:
     with open(USERS_FILE, "w") as f:
         json.dump(users, f, indent=2)
+
+
+def load_plans() -> dict:
+    if not os.path.exists(PLANS_FILE):
+        return {}
+    with open(PLANS_FILE) as f:
+        return json.load(f)
+
+
+def save_plans(plans: dict) -> None:
+    with open(PLANS_FILE, "w") as f:
+        json.dump(plans, f, indent=2)
+
+
+def _now_iso() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 # ── Auth decorators ────────────────────────────────────────────────────────────
@@ -307,6 +325,80 @@ def admin_delete_user(email):
     del users[email]
     save_users(users)
     return jsonify({"ok": True})
+
+
+# ── Plan API ───────────────────────────────────────────────────────────────────
+
+@app.route("/api/plan/<school_id>/<year>", methods=["GET"])
+@require_session
+def get_plan(email, user, school_id, year):
+    if school_id not in _school_ids(user):
+        return jsonify({"error": "Access denied"}), 403
+    plans = load_plans()
+    return jsonify(plans.get(f"{school_id}_{year}", {}))
+
+
+@app.route("/api/plan/<school_id>/<year>", methods=["POST"])
+@require_session
+def save_plan(email, user, school_id, year):
+    if school_id not in _school_ids(user):
+        return jsonify({"error": "Access denied"}), 403
+    data    = request.json or {}
+    plans   = load_plans()
+    key     = f"{school_id}_{year}"
+    existing = plans.get(key, {})
+    if existing.get("status") == "submitted":
+        return jsonify({"error": "Plan already submitted and locked."}), 400
+    plans[key] = {
+        "schoolId":           school_id,
+        "fiscalYear":         year,
+        "status":             "draft",
+        "allocEstimate":      data.get("allocEstimate", existing.get("allocEstimate")),
+        "programDescription": data.get("programDescription", ""),
+        "staffing":           data.get("staffing", []),
+        "supplies":           data.get("supplies", []),
+        "savedAt":            _now_iso(),
+        "savedBy":            email,
+        "submittedAt":        existing.get("submittedAt"),
+        "submittedBy":        existing.get("submittedBy"),
+    }
+    save_plans(plans)
+    return jsonify({"ok": True})
+
+
+@app.route("/api/plan/<school_id>/<year>/submit", methods=["POST"])
+@require_session
+def submit_plan(email, user, school_id, year):
+    if school_id not in _school_ids(user):
+        return jsonify({"error": "Access denied"}), 403
+    data    = request.json or {}
+    plans   = load_plans()
+    key     = f"{school_id}_{year}"
+    existing = plans.get(key, {})
+    if existing.get("status") == "submitted":
+        return jsonify({"error": "Plan already submitted."}), 400
+    plans[key] = {
+        "schoolId":           school_id,
+        "fiscalYear":         year,
+        "status":             "submitted",
+        "allocEstimate":      data.get("allocEstimate", existing.get("allocEstimate")),
+        "programDescription": data.get("programDescription", ""),
+        "staffing":           data.get("staffing", []),
+        "supplies":           data.get("supplies", []),
+        "savedAt":            _now_iso(),
+        "savedBy":            email,
+        "submittedAt":        _now_iso(),
+        "submittedBy":        email,
+    }
+    save_plans(plans)
+    return jsonify({"ok": True})
+
+
+@app.route("/admin/api/plans", methods=["GET"])
+@require_admin
+def admin_list_plans():
+    plans = load_plans()
+    return jsonify(sorted(plans.values(), key=lambda p: (p.get("fiscalYear",""), p.get("schoolId",""))))
 
 
 # ── Static files ───────────────────────────────────────────────────────────────

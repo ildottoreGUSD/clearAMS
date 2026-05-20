@@ -561,7 +561,7 @@ function fiscalYearPace(key) {
   return elapsed / total;
 }
 
-function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
+function YearColumn({ yearMeta, school, colWidth, animDelay=0, planStatus=null, onOpenPlan }) {
   const colRef  = useRef(null);
   const fillRef = useRef(null);
   const [showWaiver, setShowWaiver] = React.useState(false);
@@ -592,17 +592,49 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
           </div>
         </div>
 
-        {/* Plan template link */}
+        {/* Plan builder card */}
         <div className="card" style={{ padding:"18px 20px", background:"#F8FAFC", borderStyle:"dashed" }}>
-          <div style={{ fontSize:11, fontWeight:700, color:"#64748B", marginBottom:4 }}>Start planning now</div>
-          <div style={{ fontSize:11, color:"#94A3B8", marginBottom:12, lineHeight:1.5 }}>
-            Use the district template to draft your FY 2026–27 Site Expenditure Plan.
-          </div>
-          <a href={PLAN_TEMPLATE_URL} target="_blank" rel="noreferrer" style={{
-            display:"inline-flex", alignItems:"center", gap:6,
-            fontSize:11, fontWeight:700, color:"#1D4ED8",
-            textDecoration:"underline", textDecorationColor:"#93C5FD"
-          }}>📋 26-27 Plan Template ↗</a>
+          <div style={{ fontSize:11, fontWeight:700, color:"#64748B", marginBottom:4 }}>Site Expenditure Plan</div>
+          {planStatus === "submitted" ? (
+            <div>
+              <div style={{ display:"inline-flex", alignItems:"center", gap:5,
+                fontSize:11, fontWeight:700, color:"var(--green)",
+                background:"var(--green-soft)", border:"1px solid #A7F3D0",
+                borderRadius:999, padding:"3px 10px", marginBottom:10 }}>
+                ✓ Submitted
+              </div>
+              <div style={{ fontSize:11, color:"#94A3B8", marginBottom:10, lineHeight:1.5 }}>
+                Your FY 2026–27 plan has been submitted to GUSD VAPA.
+              </div>
+              <button onClick={onOpenPlan} style={{
+                fontSize:11, fontWeight:700, color:"#1D4ED8", background:"none",
+                border:"none", cursor:"pointer", padding:0, textDecoration:"underline",
+                textDecorationColor:"#93C5FD"
+              }}>View submitted plan</button>
+            </div>
+          ) : (
+            <div>
+              <div style={{ fontSize:11, color:"#94A3B8", marginBottom:12, lineHeight:1.5 }}>
+                {planStatus === "draft"
+                  ? "You have a draft in progress. Continue editing before the September 15 deadline."
+                  : "Due September 15, 2026. Start your plan now to meet the compliance deadline."}
+              </div>
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                <button onClick={onOpenPlan} style={{
+                  display:"inline-flex", alignItems:"center", justifyContent:"center", gap:6,
+                  fontSize:12, fontWeight:700, color:"white", background:"var(--navy)",
+                  border:"none", borderRadius:7, padding:"8px 14px", cursor:"pointer", width:"100%"
+                }}>
+                  {planStatus === "draft" ? "✏ Continue Draft →" : "📋 Create Plan →"}
+                </button>
+                <a href={PLAN_TEMPLATE_URL} target="_blank" rel="noreferrer" style={{
+                  display:"inline-flex", alignItems:"center", justifyContent:"center", gap:6,
+                  fontSize:11, fontWeight:600, color:"#64748B",
+                  textDecoration:"none"
+                }}>Download Word template ↗</a>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -678,6 +710,15 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
               fontSize:10, fontWeight:700, letterSpacing:".04em", color:"#1D4ED8",
               textDecoration:"underline", textDecorationColor:"#93C5FD"
             }}>📄 Site Expenditure Plan</a>
+          )}
+          {key === "fy2526" && (
+            <button onClick={onOpenPlan} style={{
+              fontSize:10, fontWeight:700, color: planStatus === "submitted" ? "var(--green)" : "#1D4ED8",
+              background:"none", border:"none", cursor:"pointer", padding:0,
+              textDecoration:"underline", textDecorationColor:"#93C5FD"
+            }}>
+              {planStatus === "submitted" ? "✓ Plan submitted" : planStatus === "draft" ? "✏ Draft in progress" : "📋 Create 25-26 plan"}
+            </button>
           )}
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:6, borderRadius:999, padding:"5px 12px",
@@ -797,12 +838,485 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0 }) {
   );
 }
 
+// ── Plan Editor ───────────────────────────────────────────────────────────────
+const PLAN_YEARS = {
+  fy2627: "FY 2026–27",
+  fy2526: "FY 2025–26",
+};
+
+function planTotal(items) {
+  return items.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0);
+}
+
+function PlanLineItems({ items, onChange, maxLabel, maxAmt, color }) {
+  const addItem = () => onChange([...items, { id: crypto.randomUUID(), description: "", amount: "" }]);
+  const removeItem = (id) => onChange(items.filter(it => it.id !== id));
+  const updateItem = (id, field, val) =>
+    onChange(items.map(it => it.id === id ? { ...it, [field]: val } : it));
+
+  const total = planTotal(items);
+  const overMax = maxAmt > 0 && total > maxAmt;
+
+  return (
+    <div>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
+        <div style={{ fontSize:11, color:"var(--muted)" }}>
+          Max allowed: <strong style={{ color: overMax ? "var(--red)" : "var(--ink)" }}>{fmt$(maxAmt)}</strong>
+          {overMax && <span style={{ color:"var(--red)", marginLeft:6 }}>⚠ Over limit</span>}
+        </div>
+        <button onClick={addItem} style={{
+          display:"inline-flex", alignItems:"center", gap:5,
+          fontSize:12, fontWeight:600, color:"var(--blue)",
+          background:"var(--blue-soft)", border:"1px solid #BFDBFE",
+          borderRadius:6, padding:"5px 10px", cursor:"pointer"
+        }}>+ Add line item</button>
+      </div>
+
+      {items.length === 0 ? (
+        <div style={{ textAlign:"center", padding:"20px 0", fontSize:13, color:"var(--muted)",
+          border:"1px dashed var(--line)", borderRadius:8 }}>
+          No items yet — click "+ Add line item"
+        </div>
+      ) : (
+        <div style={{ border:"1px solid var(--line)", borderRadius:8, overflow:"hidden" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 140px 36px",
+            background:"var(--surface)", borderBottom:"1px solid var(--line)",
+            padding:"7px 12px", fontSize:10.5, fontWeight:600, color:"var(--muted)",
+            textTransform:"uppercase", letterSpacing:".07em" }}>
+            <span>Description</span><span>Amount</span><span />
+          </div>
+          {items.map((it, i) => (
+            <div key={it.id} style={{
+              display:"grid", gridTemplateColumns:"1fr 140px 36px", alignItems:"center",
+              padding:"7px 8px 7px 12px", gap:8,
+              borderBottom: i < items.length - 1 ? "1px solid var(--line-2)" : "none",
+              background:"white"
+            }}>
+              <input value={it.description} placeholder="Describe the expenditure…"
+                onChange={e => updateItem(it.id, "description", e.target.value)}
+                style={{ fontSize:13, padding:"6px 9px", border:"1px solid var(--line)",
+                  borderRadius:6, fontFamily:"inherit", color:"var(--ink)", outline:"none", width:"100%" }} />
+              <div style={{ position:"relative" }}>
+                <span style={{ position:"absolute", left:9, top:"50%", transform:"translateY(-50%)",
+                  fontSize:13, color:"var(--muted)", pointerEvents:"none" }}>$</span>
+                <input type="number" min="0" step="0.01" value={it.amount} placeholder="0"
+                  onChange={e => updateItem(it.id, "amount", e.target.value)}
+                  style={{ fontSize:13, padding:"6px 9px 6px 20px", border:"1px solid var(--line)",
+                    borderRadius:6, fontFamily:"Geist Mono, monospace", color:"var(--ink)",
+                    outline:"none", width:"100%" }} />
+              </div>
+              <button onClick={() => removeItem(it.id)} style={{
+                width:28, height:28, borderRadius:6, border:"1px solid var(--line)",
+                background:"white", cursor:"pointer", color:"var(--muted)",
+                display:"flex", alignItems:"center", justifyContent:"center", fontSize:14
+              }}>×</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ marginTop:8, textAlign:"right", fontSize:12, fontWeight:700,
+        color: overMax ? "var(--red)" : "var(--ink)" }}>
+        Total: {fmt$(total)}
+        {overMax && <span style={{ fontSize:11, fontWeight:400, color:"var(--red)", marginLeft:6 }}>
+          ({fmt$(total - maxAmt)} over limit)
+        </span>}
+      </div>
+    </div>
+  );
+}
+
+function PlanEditor({ schoolId, fiscalYear, onBack, user }) {
+  const school    = SCHOOLS[schoolId];
+  const yearLabel = PLAN_YEARS[fiscalYear] || fiscalYear;
+  const isUpcoming = fiscalYear === "fy2627";
+
+  // Allocation: for upcoming year, default to prior year allocation as estimate
+  const officialAlloc = school[fiscalYear]?.allocation ?? null;
+  const fallbackAlloc = isUpcoming ? (school.fy2526?.allocation ?? 0) : (officialAlloc ?? 0);
+
+  const [allocEstimate,      setAllocEstimate]      = useState(null);
+  const [programDescription, setProgramDescription] = useState("");
+  const [staffing,           setStaffing]           = useState([]);
+  const [supplies,           setSupplies]           = useState([]);
+  const [status,             setStatus]             = useState("draft");
+  const [submittedAt,        setSubmittedAt]        = useState(null);
+  const [submittedBy,        setSubmittedBy]        = useState(null);
+  const [savedAt,            setSavedAt]            = useState(null);
+  const [loading,            setLoading]            = useState(true);
+  const [saving,             setSaving]             = useState(false);
+  const [msg,                setMsg]                = useState(null);
+  const [confirmSubmit,      setConfirmSubmit]      = useState(false);
+
+  const alloc      = allocEstimate !== null ? allocEstimate : fallbackAlloc;
+  const maxStaff   = alloc * 0.80;
+  const maxSupply  = alloc * 0.20;
+  const staffTotal = planTotal(staffing);
+  const suppTotal  = planTotal(supplies);
+  const grandTotal = staffTotal + suppTotal;
+  const pct        = alloc > 0 ? Math.min(grandTotal / alloc, 1) : 0;
+  const overBudget = grandTotal > alloc;
+  const overStaff  = staffTotal > maxStaff;
+  const overSupply = suppTotal  > maxSupply;
+  const isLocked   = status === "submitted";
+
+  // Load existing plan
+  useEffect(() => {
+    const token = sessionStorage.getItem("clearams_token");
+    fetch(`/api/plan/${schoolId}/${fiscalYear}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    })
+      .then(r => r.json())
+      .then(d => {
+        if (d.staffing)           setStaffing(d.staffing);
+        if (d.supplies)           setSupplies(d.supplies);
+        if (d.programDescription !== undefined) setProgramDescription(d.programDescription);
+        if (d.allocEstimate != null) setAllocEstimate(d.allocEstimate);
+        if (d.status)             setStatus(d.status);
+        if (d.submittedAt)        setSubmittedAt(d.submittedAt);
+        if (d.submittedBy)        setSubmittedBy(d.submittedBy);
+        if (d.savedAt)            setSavedAt(d.savedAt);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [schoolId, fiscalYear]);
+
+  const buildPayload = () => ({
+    allocEstimate:      alloc,
+    programDescription,
+    staffing,
+    supplies,
+  });
+
+  const saveDraft = async () => {
+    setSaving(true);
+    setMsg(null);
+    try {
+      const token = sessionStorage.getItem("clearams_token");
+      const res = await fetch(`/api/plan/${schoolId}/${fiscalYear}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(buildPayload()),
+      });
+      const d = await res.json();
+      if (d.ok) { setSavedAt(new Date().toISOString()); setMsg({ type:"ok", text:"Draft saved." }); }
+      else setMsg({ type:"err", text: d.error || "Save failed." });
+    } catch { setMsg({ type:"err", text:"Network error." }); }
+    setSaving(false);
+    setTimeout(() => setMsg(null), 3000);
+  };
+
+  const submitPlan = async () => {
+    setConfirmSubmit(false);
+    setSaving(true);
+    setMsg(null);
+    try {
+      const token = sessionStorage.getItem("clearams_token");
+      const res = await fetch(`/api/plan/${schoolId}/${fiscalYear}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(buildPayload()),
+      });
+      const d = await res.json();
+      if (d.ok) {
+        setStatus("submitted");
+        setSubmittedAt(new Date().toISOString());
+        setSubmittedBy(user?.email);
+        setMsg({ type:"ok", text:"Plan submitted to GUSD VAPA." });
+      } else setMsg({ type:"err", text: d.error || "Submit failed." });
+    } catch { setMsg({ type:"err", text:"Network error." }); }
+    setSaving(false);
+  };
+
+  const printPlan = () => window.print();
+
+  if (loading) return (
+    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
+      <div style={{ color:"var(--muted)", fontSize:13 }}>Loading plan…</div>
+    </div>
+  );
+
+  return (
+    <div style={{ minHeight:"100vh", background:"var(--surface)" }} id="plan-editor">
+
+      {/* Print styles */}
+      <style>{`
+        @media print {
+          #plan-editor-toolbar, #plan-editor-actions { display: none !important; }
+          #plan-editor { background: white !important; }
+          body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+      `}</style>
+
+      {/* Toolbar */}
+      <div id="plan-editor-toolbar" className="hairline-b" style={{ background:"white", position:"sticky", top:0, zIndex:10 }}>
+        <div className="mx-auto px-10 py-3 flex items-center justify-between" style={{ maxWidth:900 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <button onClick={onBack} style={{ background:"none", border:"1px solid var(--line)",
+              borderRadius:7, padding:"6px 12px", fontSize:13, fontWeight:500, cursor:"pointer",
+              display:"flex", alignItems:"center", gap:6, color:"var(--ink)" }}>
+              ← Back
+            </button>
+            <div>
+              <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", letterSpacing:"-.01em" }}>
+                {yearLabel} Site Expenditure Plan
+              </div>
+              <div style={{ fontSize:11, color:"var(--muted)", marginTop:1 }}>{school.name}</div>
+            </div>
+          </div>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            {isLocked && (
+              <span style={{ fontSize:11, fontWeight:700, color:"var(--green)",
+                background:"var(--green-soft)", border:"1px solid #A7F3D0",
+                borderRadius:999, padding:"4px 12px" }}>✓ Submitted</span>
+            )}
+            {savedAt && !isLocked && (
+              <span style={{ fontSize:11, color:"var(--muted)" }}>
+                Saved {new Date(savedAt).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}
+              </span>
+            )}
+            <button onClick={printPlan} style={{ background:"none", border:"1px solid var(--line)",
+              borderRadius:7, padding:"6px 12px", fontSize:13, fontWeight:500, cursor:"pointer",
+              display:"flex", alignItems:"center", gap:6, color:"var(--ink)" }}>
+              🖨 Print
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto px-10 py-8" style={{ maxWidth:900 }}>
+
+        {/* Submitted banner */}
+        {isLocked && (
+          <div style={{ background:"var(--green-soft)", border:"1px solid #A7F3D0", borderRadius:10,
+            padding:"14px 20px", marginBottom:24, display:"flex", alignItems:"center", gap:12 }}>
+            <span style={{ fontSize:18 }}>✓</span>
+            <div>
+              <div style={{ fontSize:13, fontWeight:700, color:"var(--green)" }}>Plan submitted</div>
+              <div style={{ fontSize:12, color:"var(--green)", opacity:.8, marginTop:2 }}>
+                Submitted by {submittedBy} on {new Date(submittedAt).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}. Contact GUSD VAPA to request changes.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Allocation bar */}
+        <div className="card" style={{ padding:"20px 24px", marginBottom:20 }}>
+          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:14, gap:16 }}>
+            <div style={{ flex:1 }}>
+              <div className="eyebrow" style={{ marginBottom:6 }}>
+                {isUpcoming ? "Estimated Allocation (FY 2025–26 basis)" : "Allocation"}
+              </div>
+              {isUpcoming ? (
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <span style={{ fontSize:10, color:"#92400E", background:"#FEF3C7",
+                    border:"1px solid #FDE68A", borderRadius:999, padding:"2px 9px",
+                    fontWeight:600, whiteSpace:"nowrap" }}>
+                    ⚠ Official amount TBD — CDE publishes July 2026
+                  </span>
+                </div>
+              ) : (
+                <div className="serif" style={{ fontSize:28, lineHeight:1, color:"var(--ink)" }}>
+                  {fmt$(alloc)}
+                </div>
+              )}
+              {isUpcoming && (
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:8 }}>
+                  <span style={{ fontSize:12, color:"var(--muted)" }}>Planning with:</span>
+                  <div style={{ position:"relative" }}>
+                    <span style={{ position:"absolute", left:9, top:"50%", transform:"translateY(-50%)",
+                      fontSize:13, color:"var(--muted)", pointerEvents:"none" }}>$</span>
+                    <input type="number" disabled={isLocked} value={alloc} min="0" step="1"
+                      onChange={e => setAllocEstimate(parseFloat(e.target.value) || 0)}
+                      style={{ fontSize:14, fontWeight:700, padding:"6px 9px 6px 20px",
+                        border:"1px solid var(--line)", borderRadius:7,
+                        fontFamily:"Geist Mono, monospace", color:"var(--ink)", outline:"none",
+                        width:160, background: isLocked ? "#f8fafc" : "white" }} />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ textAlign:"right", flexShrink:0 }}>
+              <div className="eyebrow" style={{ marginBottom:4 }}>Planned</div>
+              <div className="mono" style={{ fontSize:22, fontWeight:700,
+                color: overBudget ? "var(--red)" : "var(--ink)" }}>
+                {fmt$(grandTotal)}
+              </div>
+              <div style={{ fontSize:11, color:"var(--muted)", marginTop:2 }}>
+                of {fmt$(alloc)} ({alloc > 0 ? fmtPct(grandTotal/alloc) : "0%"})
+              </div>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ height:8, background:"#EDF0F5", borderRadius:999, overflow:"hidden", marginBottom:10 }}>
+            <div style={{ height:"100%", borderRadius:999, transition:"width .3s",
+              width:`${Math.min(pct*100,100)}%`,
+              background: overBudget ? "#DC2626" : pct > 0.95 ? "#B45309" : "#1D4ED8" }} />
+          </div>
+
+          {/* 80/20 breakdown */}
+          <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+              <span style={{ width:10, height:10, borderRadius:2, background:"#1D4ED8", display:"inline-block" }} />
+              <span style={{ fontSize:12, color:"var(--ink)" }}>
+                Staffing: <strong className="mono">{fmt$(staffTotal)}</strong>
+                <span style={{ color: overStaff ? "var(--red)" : "var(--muted)", marginLeft:4 }}>
+                  / {fmt$(maxStaff)} max (80%)
+                </span>
+                {overStaff && <span style={{ color:"var(--red)", marginLeft:4, fontWeight:700 }}>⚠ Over</span>}
+              </span>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+              <span style={{ width:10, height:10, borderRadius:2, background:"#0D9488", display:"inline-block" }} />
+              <span style={{ fontSize:12, color:"var(--ink)" }}>
+                Supplies: <strong className="mono">{fmt$(suppTotal)}</strong>
+                <span style={{ color: overSupply ? "var(--red)" : "var(--muted)", marginLeft:4 }}>
+                  / {fmt$(maxSupply)} max (20%)
+                </span>
+                {overSupply && <span style={{ color:"var(--red)", marginLeft:4, fontWeight:700 }}>⚠ Over</span>}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Program description */}
+        <div className="card" style={{ padding:"20px 24px", marginBottom:20 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", marginBottom:4 }}>Program Description</div>
+          <div style={{ fontSize:12, color:"var(--muted)", marginBottom:12 }}>
+            Briefly describe the arts and music programming this funding will support.
+          </div>
+          <textarea disabled={isLocked} value={programDescription}
+            onChange={e => setProgramDescription(e.target.value)}
+            rows={4} placeholder="Describe the school's arts and music program, goals, and how Prop 28 funds will be used…"
+            style={{ width:"100%", padding:"10px 12px", fontSize:13, fontFamily:"inherit",
+              border:"1px solid var(--line)", borderRadius:8, resize:"vertical",
+              color:"var(--ink)", outline:"none", lineHeight:1.6, boxSizing:"border-box",
+              background: isLocked ? "#f8fafc" : "white" }} />
+        </div>
+
+        {/* Staffing */}
+        <div className="card" style={{ padding:"20px 24px", marginBottom:20 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", marginBottom:2 }}>
+            Staffing & Personnel
+          </div>
+          <div style={{ fontSize:12, color:"var(--muted)", marginBottom:16 }}>
+            Include teachers, coaches, resident artists, and any personnel funded by Prop 28.
+            Must not exceed 80% of allocation ({fmt$(maxStaff)}).
+          </div>
+          {isLocked
+            ? <PlanLineItems items={staffing} onChange={() => {}} maxAmt={maxStaff} />
+            : <PlanLineItems items={staffing} onChange={setStaffing} maxAmt={maxStaff} />
+          }
+        </div>
+
+        {/* Supplies */}
+        <div className="card" style={{ padding:"20px 24px", marginBottom:28 }}>
+          <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", marginBottom:2 }}>
+            Supplies & Materials
+          </div>
+          <div style={{ fontSize:12, color:"var(--muted)", marginBottom:16 }}>
+            Include instruments, equipment, materials, and other non-personnel costs.
+            Must not exceed 20% of allocation ({fmt$(maxSupply)}).
+          </div>
+          {isLocked
+            ? <PlanLineItems items={supplies} onChange={() => {}} maxAmt={maxSupply} />
+            : <PlanLineItems items={supplies} onChange={setSupplies} maxAmt={maxSupply} />
+          }
+        </div>
+
+        {/* Actions */}
+        {!isLocked && (
+          <div id="plan-editor-actions" style={{ display:"flex", alignItems:"center",
+            justifyContent:"space-between", gap:12 }}>
+            <div>
+              {msg && (
+                <span style={{ fontSize:13, fontWeight:500,
+                  color: msg.type === "ok" ? "var(--green)" : "var(--red)" }}>
+                  {msg.text}
+                </span>
+              )}
+            </div>
+            <div style={{ display:"flex", gap:10 }}>
+              <button onClick={saveDraft} disabled={saving} style={{
+                padding:"9px 20px", fontSize:13, fontWeight:600, cursor:"pointer",
+                border:"1px solid var(--line)", borderRadius:8, background:"white",
+                color:"var(--ink)", opacity: saving ? .5 : 1
+              }}>
+                {saving ? "Saving…" : "Save Draft"}
+              </button>
+              <button onClick={() => setConfirmSubmit(true)} disabled={saving || overBudget || overStaff || overSupply || grandTotal === 0}
+                style={{ padding:"9px 20px", fontSize:13, fontWeight:600, cursor:"pointer",
+                  border:"none", borderRadius:8, background:"var(--navy)", color:"white",
+                  opacity: (saving || overBudget || overStaff || overSupply || grandTotal === 0) ? .45 : 1
+                }}>
+                Submit Plan →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div style={{ marginTop:32, paddingTop:16, borderTop:"1px solid var(--line)",
+          fontSize:11, color:"var(--muted)", lineHeight:1.6 }}>
+          Glendale Unified School District · Prop 28 (Arts & Music in Schools) ·
+          Questions: <a href="mailto:eahangarzadeh@gusd.net" style={{ color:"var(--blue)" }}>Dr. Emil Ahangarzadeh</a>
+        </div>
+      </div>
+
+      {/* Confirm submit modal */}
+      {confirmSubmit && (
+        <div onClick={() => setConfirmSubmit(false)} style={{
+          position:"fixed", inset:0, zIndex:1000, background:"rgba(11,27,51,.5)",
+          backdropFilter:"blur(3px)", display:"flex", alignItems:"center", justifyContent:"center", padding:24
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background:"white", borderRadius:16, padding:"28px 32px",
+            maxWidth:420, width:"100%", boxShadow:"0 24px 64px rgba(11,27,51,.22)"
+          }}>
+            <div style={{ fontSize:17, fontWeight:700, color:"var(--ink)", marginBottom:8 }}>Submit plan?</div>
+            <p style={{ fontSize:13, color:"var(--muted)", lineHeight:1.65, marginBottom:20 }}>
+              Once submitted, your {yearLabel} Site Expenditure Plan will be locked and sent to GUSD VAPA for review.
+              You won't be able to make further edits without contacting Dr. Ahangarzadeh.
+            </p>
+            <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
+              <button onClick={() => setConfirmSubmit(false)} style={{
+                padding:"9px 18px", fontSize:13, fontWeight:500, cursor:"pointer",
+                border:"1px solid var(--line)", borderRadius:8, background:"white", color:"var(--ink)"
+              }}>Cancel</button>
+              <button onClick={submitPlan} style={{
+                padding:"9px 18px", fontSize:13, fontWeight:600, cursor:"pointer",
+                border:"none", borderRadius:8, background:"var(--navy)", color:"white"
+              }}>Yes, submit</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
-function Dashboard({ schoolId, schoolIds, onSchoolChange, user, onSignOut }) {
+function Dashboard({ schoolId, schoolIds, onSchoolChange, user, onSignOut, onOpenPlan }) {
   const school = SCHOOLS[schoolId];
   const multiSchool = schoolIds && schoolIds.length > 1;
-  const bodyRef = useRef(null);
-  const prevId  = useRef(schoolId);
+  const bodyRef  = useRef(null);
+  const prevId   = useRef(schoolId);
+  const [planStatuses, setPlanStatuses] = useState({});
+
+  // Fetch plan status for all plan-eligible years
+  useEffect(() => {
+    const token = sessionStorage.getItem("clearams_token");
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    Promise.all(["fy2627", "fy2526"].map(yr =>
+      fetch(`/api/plan/${schoolId}/${yr}`, { headers })
+        .then(r => r.json())
+        .then(d => [yr, d.status || null])
+        .catch(() => [yr, null])
+    )).then(results => {
+      setPlanStatuses(Object.fromEntries(results));
+    });
+  }, [schoolId]);
 
   const CONTAINER = 1320;
   const GAP       = 32;
@@ -885,7 +1399,9 @@ function Dashboard({ schoolId, schoolIds, onSchoolChange, user, onSignOut }) {
         <div className="flex" style={{ gap:GAP }}>
           {YEARS.map((yr, i) => (
             <YearColumn key={yr.key} yearMeta={yr} school={school}
-              colWidth={colWidth} animDelay={i * 0.12} />
+              colWidth={colWidth} animDelay={i * 0.12}
+              planStatus={planStatuses[yr.key] || null}
+              onOpenPlan={() => onOpenPlan(yr.key)} />
           ))}
         </div>
       </div>
@@ -1174,10 +1690,11 @@ function ResetPasswordScreen({ email, onDone }) {
 
 // ── App root ──────────────────────────────────────────────────────────────────
 function App() {
-  const [view,      setView]      = useState("loading");
-  const [schoolIds, setSchoolIds] = useState([]);
-  const [schoolId,  setSchoolId]  = useState(null);
-  const [user,      setUser]      = useState(null);
+  const [view,        setView]        = useState("loading");
+  const [schoolIds,   setSchoolIds]   = useState([]);
+  const [schoolId,    setSchoolId]    = useState(null);
+  const [user,        setUser]        = useState(null);
+  const [planYear,    setPlanYear]    = useState(null);
 
   const applySession = (data) => {
     const ids = data.schoolIds?.length ? data.schoolIds
@@ -1224,8 +1741,22 @@ function App() {
     </div>
   );
 
-  if (view === "dashboard") return <Dashboard schoolId={schoolId} schoolIds={schoolIds} onSchoolChange={setSchoolId} user={user} onSignOut={signOut} />;
-  if (view === "reset")     return <ResetPasswordScreen email={user?.email} onDone={onPasswordReset} />;
+  if (view === "plan") return (
+    <PlanEditor
+      schoolId={schoolId}
+      fiscalYear={planYear}
+      user={user}
+      onBack={() => setView("dashboard")}
+    />
+  );
+  if (view === "dashboard") return (
+    <Dashboard
+      schoolId={schoolId} schoolIds={schoolIds}
+      onSchoolChange={setSchoolId} user={user} onSignOut={signOut}
+      onOpenPlan={(yr) => { setPlanYear(yr); setView("plan"); }}
+    />
+  );
+  if (view === "reset") return <ResetPasswordScreen email={user?.email} onDone={onPasswordReset} />;
   return <LoginScreen onLogin={onLogin} />;
 }
 

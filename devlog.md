@@ -1,5 +1,10 @@
 # Dev Log
 
+## 2026-05-20 (continued 2)
+- Built in-app Site Expenditure Plan builder. Server: `plans.json` on the `/data` volume; endpoints `GET/POST /api/plan/<school>/<year>`, `POST /api/plan/<school>/<year>/submit`, `GET /admin/api/plans` (admin). Plans keyed by `schoolId_fiscalYear`, status `draft` or `submitted` (locked on submit).
+- Dashboard: `PlanEditor` React view (full-page, accessible via router). Allocation bar with live 80/20 compliance tracking (staffing ≤ 80%, supplies ≤ 20%); Submit button disabled while over limits. Upcoming FY 2026-27 column shows "Create Plan →" / "Continue Draft →" / "View submitted plan" based on status; FY 2025-26 column shows inline plan status link. Print button hides toolbar/action bar for clean printout.
+- Admin panel: "Site Expenditure Plans" table shows all plans across all schools — school, year, status badge, staffing total, supplies total, grand total, submitted-by.
+
 ## 2026-05-20 (continued)
 - Configured Resend for transactional email (free tier, 100/day). Verified gusddev.app domain in Resend via Cloudflare DNS (DKIM TXT, SPF MX+TXT, DMARC TXT). Set SMTP secrets on Fly.io (smtp.resend.com:587, user=resend, from=noreply@gusddev.app). Welcome email toggle now active in admin panel.
 
