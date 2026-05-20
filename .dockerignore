@@ -1,0 +1,12 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+remotion-viz/node_modules/
+remotion-viz/dist/
+remotion-viz/out/
+.env
+.env.*
+.devcontainer/
+*.log
+drive-download-*.zip

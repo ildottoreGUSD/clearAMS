@@ -243,6 +243,13 @@
               </div>
             </div>
           </div>
+          <div id="email-toggle-add" class="field" style="display:none;margin-bottom:18px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:normal;font-weight:500;font-size:13px;color:var(--ink);margin:0">
+              <input type="checkbox" id="add-send-email" checked style="width:auto;padding:0;border:none;background:none;cursor:pointer" />
+              Send welcome email with login credentials
+            </label>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-left:20px">Sends login URL, email, and temporary password to the user.</div>
+          </div>
           <button class="btn btn-primary" onclick="addUser()" style="width:100%">Add / Update User</button>
         </div>
       </div>
@@ -261,6 +268,13 @@
           <div class="field">
             <label>New Temporary Password</label>
             <input type="text" id="reset-password" placeholder="Temporary password (min 6 chars)" />
+          </div>
+          <div id="email-toggle-reset" class="field" style="display:none;margin-bottom:18px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:normal;font-weight:500;font-size:13px;color:var(--ink);margin:0">
+              <input type="checkbox" id="reset-send-email" checked style="width:auto;padding:0;border:none;background:none;cursor:pointer" />
+              Notify user of new password by email
+            </label>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;margin-left:20px">Sends the new temporary password and login link to the user.</div>
           </div>
           <button class="btn btn-amber" onclick="resetPassword()" style="width:100%;margin-top:8px">Reset Password</button>
         </div>
@@ -302,6 +316,7 @@
 
 <script>
 let ADMIN_KEY = "";
+let EMAIL_ENABLED = false;
 
 // ── Auth gate ──────────────────────────────────────────────────────────────────
 document.getElementById("key-input").addEventListener("keydown", e => {
@@ -329,6 +344,16 @@ async function authenticate() {
 
   const users = await res.json();
   renderUsers(users);
+
+  // Show email toggles if email is configured on the server
+  try {
+    const cfg = await api("GET", "/admin/api/email-config");
+    EMAIL_ENABLED = cfg.enabled;
+    if (EMAIL_ENABLED) {
+      document.getElementById("email-toggle-add").style.display = "block";
+      document.getElementById("email-toggle-reset").style.display = "block";
+    }
+  } catch(_) {}
 }
 
 // ── API helpers ────────────────────────────────────────────────────────────────
@@ -411,13 +436,16 @@ async function addUser() {
   const email     = document.getElementById("add-email").value.trim().toLowerCase();
   const password  = document.getElementById("add-password").value;
   const schoolIds = getSelectedSchools();
+  const sendEmail = EMAIL_ENABLED && document.getElementById("add-send-email").checked;
 
   if (!email || !password) { toast("Fill in email and password.", "err"); return; }
   if (!schoolIds.length)   { toast("Select at least one school.", "err"); return; }
 
   try {
-    await api("POST", "/admin/api/user", { email, password, schoolIds });
-    toast(`User ${email} added.`, "ok");
+    const result = await api("POST", "/admin/api/user", { email, password, schoolIds, sendEmail });
+    if (result.emailSent)  toast(`User ${email} added. Welcome email sent.`, "ok");
+    else if (result.emailError) toast(`User ${email} added. Email failed: ${result.emailError}`, "err");
+    else toast(`User ${email} added.`, "ok");
     document.getElementById("add-email").value    = "";
     document.getElementById("add-password").value = "";
     document.querySelectorAll('.school-list input[name=school]').forEach(cb => cb.checked = false);
@@ -427,14 +455,17 @@ async function addUser() {
 }
 
 async function resetPassword() {
-  const email    = document.getElementById("reset-email").value.trim().toLowerCase();
-  const password = document.getElementById("reset-password").value;
+  const email     = document.getElementById("reset-email").value.trim().toLowerCase();
+  const password  = document.getElementById("reset-password").value;
+  const sendEmail = EMAIL_ENABLED && document.getElementById("reset-send-email").checked;
 
   if (!email || !password) { toast("Fill in both fields.", "err"); return; }
 
   try {
-    await api("POST", "/admin/api/reset", { email, password });
-    toast(`Password reset for ${email}.`, "ok");
+    const result = await api("POST", "/admin/api/reset", { email, password, sendEmail });
+    if (result.emailSent)  toast(`Password reset for ${email}. Notification sent.`, "ok");
+    else if (result.emailError) toast(`Password reset for ${email}. Email failed: ${result.emailError}`, "err");
+    else toast(`Password reset for ${email}.`, "ok");
     document.getElementById("reset-email").value    = "";
     document.getElementById("reset-password").value = "";
     await loadUsers();

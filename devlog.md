@@ -1,5 +1,12 @@
 # Dev Log
 
+## 2026-05-20
+- Migrated from Railway (outage on deploy day) to Fly.io. Created Dockerfile (multi-stage: Node 20 builds Remotion player via `npm run build:player`, Python 3.12-slim runs Flask/gunicorn), fly.toml (lax region, shared-cpu-1x 256MB, always-on `auto_stop=off min_machines=1`), .dockerignore, docker-entrypoint.sh.
+- Added 1 GB encrypted Fly.io volume (`clearams_data`) mounted at `/data`; `users.json` is seeded there on first boot from the bundled copy. Added `DATA_DIR` env var to server.py so path is configurable (defaults to app dir in local dev, `/data` on Fly).
+- Set `ADMIN_KEY` as a Fly.io secret; `APP_URL` set in fly.toml env.
+- Added custom domain `clearams.gusddev.app` to Fly.io (`fly certs add`); updated Cloudflare DNS from old tunnel CNAME to A/AAAA records (DNS-only, grey cloud) pointing to Fly.io IPs. Let's Encrypt cert issued and verified. `clearams.fly.dev` is blocked by GUSD network filter; `clearams.gusddev.app` is not.
+- Added welcome email feature: server.py reads `SMTP_HOST/PORT/USER/PASS/FROM` env vars; `send_welcome_email()` uses stdlib smtplib (no new deps). `/admin/api/user` and `/admin/api/reset` accept `sendEmail` flag and return `emailSent`/`emailError`. Added `/admin/api/email-config` endpoint. Admin panel shows "Send welcome email" checkbox on both Add User and Reset Password forms — visible only when email is configured on the server.
+
 ## 2026-05-19 (continued 10)
 - Added Railway deployment config: requirements.txt (flask, bcrypt, gunicorn), Procfile (gunicorn --workers 1), PORT env var in server.py, removed dead Remotion player routes from server.py, added __pycache__ to .gitignore.
 - Removed Claude co-authorship from all 46 commits (git filter-repo + force push).

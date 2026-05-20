@@ -13,14 +13,70 @@ import bcrypt
 import json
 import os
 import secrets
+import smtplib
+import ssl
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from functools import wraps
 from flask import Flask, request, jsonify, send_from_directory
 
 app = Flask(__name__, static_folder=".")
 
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
-USERS_FILE  = os.path.join(BASE_DIR, "users.json")
+DATA_DIR    = os.environ.get("DATA_DIR", BASE_DIR)
+USERS_FILE  = os.path.join(DATA_DIR, "users.json")
 ADMIN_KEY   = os.environ.get("ADMIN_KEY") or secrets.token_hex(16)
+
+SMTP_HOST     = os.environ.get("SMTP_HOST", "")
+SMTP_PORT     = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER     = os.environ.get("SMTP_USER", "")
+SMTP_PASS     = os.environ.get("SMTP_PASS", "")
+SMTP_FROM     = os.environ.get("SMTP_FROM", "") or SMTP_USER
+APP_URL       = os.environ.get("APP_URL", "https://clearams.gusddev.app")
+EMAIL_ENABLED = bool(SMTP_HOST and SMTP_USER and SMTP_PASS)
+
+_SCHOOL_NAMES = {
+    "hoover":"Hoover HS","crescenta":"CVHS","glendale":"Glendale HS",
+    "clark":"Clark HS","daily":"Daily HS","roosevelt":"Roosevelt MS",
+    "rosemont":"Rosemont MS","toll":"Toll MS","wilson":"Wilson MS",
+    "balboa":"Balboa ES","cerritos":"Cerritos ES","columbus":"Columbus ES",
+    "dunsmore":"Dunsmore ES","edison":"Edison ES","franklin":"Franklin ES",
+    "fremont":"Fremont ES","glenoaks":"Glenoaks ES","jefferson":"Jefferson ES",
+    "keppel":"Keppel ES","lacrescenta":"La Crescenta ES","lincoln":"Lincoln ES",
+    "mann":"Horace Mann ES","marshall":"Marshall ES","montevista":"Monte Vista ES",
+    "mountainave":"Mountain Ave ES","muir":"Muir ES","valleyview":"Valley View ES",
+    "verdugowoodlands":"Verdugo Woodlands ES","rdwhite":"R.D. White ES",
+    "cloud":"Cloud Preschool","verdugoacademy":"Verdugo Academy",
+    "jewelcity":"Jewel City","pacificave":"Pacific Avenue Education Center",
+}
+
+
+def send_welcome_email(to_email: str, password: str, school_ids: list) -> None:
+    schools = ", ".join(_SCHOOL_NAMES.get(s, s) for s in school_ids) or "your school"
+    subject = "Your ClearAMS account is ready — GUSD VAPA"
+    body = (
+        f"Hi,\n\n"
+        f"Your ClearAMS account has been created for {schools}.\n\n"
+        f"ClearAMS is the Prop 28 / VAPA budget dashboard for Glendale Unified schools.\n\n"
+        f"  Login:    {APP_URL}\n"
+        f"  Email:    {to_email}\n"
+        f"  Password: {password}\n\n"
+        f"You will be prompted to set your own password on first login.\n\n"
+        f"Questions? Contact Dr. Emil Ahangarzadeh at eahangarzadeh@gusd.net\n\n"
+        f"— GUSD VAPA Team\n"
+    )
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"]    = SMTP_FROM
+    msg["To"]      = to_email
+    msg.attach(MIMEText(body, "plain"))
+
+    ctx = ssl.create_default_context()
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as s:
+        s.ehlo()
+        s.starttls(context=ctx)
+        s.login(SMTP_USER, SMTP_PASS)
+        s.sendmail(SMTP_FROM, to_email, msg.as_string())
 
 # In-process session store  {token: email}
 _sessions: dict[str, str] = {}
@@ -149,6 +205,12 @@ def api_logout():
 
 # ── Admin API ──────────────────────────────────────────────────────────────────
 
+@app.route("/admin/api/email-config", methods=["GET"])
+@require_admin
+def admin_email_config():
+    return jsonify({"enabled": EMAIL_ENABLED})
+
+
 @app.route("/admin/api/users", methods=["GET"])
 @require_admin
 def admin_list_users():
@@ -170,6 +232,7 @@ def admin_add_user():
     email      = (data.get("email") or "").strip().lower()
     password   = (data.get("password") or "")
     school_ids = data.get("schoolIds") or []
+    send_email = bool(data.get("sendEmail", False))
     if not school_ids and data.get("schoolId"):
         school_ids = [data["schoolId"].strip()]
 
@@ -185,15 +248,27 @@ def admin_add_user():
         "mustResetPassword": True,
     }
     save_users(users)
-    return jsonify({"ok": True, "email": email})
+
+    result = {"ok": True, "email": email}
+    if send_email:
+        if EMAIL_ENABLED:
+            try:
+                send_welcome_email(email, password, school_ids)
+                result["emailSent"] = True
+            except Exception as ex:
+                result["emailError"] = str(ex)
+        else:
+            result["emailError"] = "Email not configured on server."
+    return jsonify(result)
 
 
 @app.route("/admin/api/reset", methods=["POST"])
 @require_admin
 def admin_reset_password():
-    data     = request.json or {}
-    email    = (data.get("email") or "").strip().lower()
-    password = (data.get("password") or "")
+    data       = request.json or {}
+    email      = (data.get("email") or "").strip().lower()
+    password   = (data.get("password") or "")
+    send_email = bool(data.get("sendEmail", False))
 
     if not email or not password:
         return jsonify({"error": "email and password are required."}), 400
@@ -204,10 +279,22 @@ def admin_reset_password():
     if email not in users:
         return jsonify({"error": "User not found."}), 404
 
+    school_ids = _school_ids(users[email])
     users[email]["passwordHash"]      = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
     users[email]["mustResetPassword"] = True
     save_users(users)
-    return jsonify({"ok": True})
+
+    result = {"ok": True}
+    if send_email:
+        if EMAIL_ENABLED:
+            try:
+                send_welcome_email(email, password, school_ids)
+                result["emailSent"] = True
+            except Exception as ex:
+                result["emailError"] = str(ex)
+        else:
+            result["emailError"] = "Email not configured on server."
+    return jsonify(result)
 
 
 @app.route("/admin/api/user/<path:email>", methods=["DELETE"])
