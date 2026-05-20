@@ -324,8 +324,9 @@
               <th>School</th>
               <th>Year</th>
               <th>Status</th>
-              <th>Staffing</th>
-              <th>Supplies</th>
+              <th>Students</th>
+              <th>Personnel</th>
+              <th>Supplies + Services</th>
               <th>Total Planned</th>
               <th>Submitted By</th>
             </tr>
@@ -541,16 +542,17 @@ function renderPlans(plans) {
 
   const tbody = document.getElementById("plans-tbody");
   if (plans.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No plans submitted yet.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No plans submitted yet.</td></tr>`;
     return;
   }
 
   const fmt$ = n => isNaN(n) ? "—" : "$" + Math.round(n).toLocaleString();
+  const sum  = arr => (arr || []).reduce((s, it) => s + (parseFloat(it.amount) || 0), 0);
   tbody.innerHTML = plans.map(p => {
-    const staffTotal = (p.staffing || []).reduce((s, it) => s + (parseFloat(it.amount) || 0), 0);
-    const suppTotal  = (p.supplies || []).reduce((s, it) => s + (parseFloat(it.amount) || 0), 0);
-    const grand      = staffTotal + suppTotal;
-    const submitted  = p.status === "submitted";
+    const personnel    = sum(p.certificated) + sum(p.classified);
+    const nonPersonnel = sum(p.supplies) + sum(p.services);
+    const grand        = personnel + nonPersonnel;
+    const submitted    = p.status === "submitted";
     return `
     <tr>
       <td style="font-size:13px;font-weight:600">${esc(p.schoolId)}</td>
@@ -560,8 +562,9 @@ function renderPlans(plans) {
           ? `<span class="badge badge-green">Submitted</span>`
           : `<span class="badge badge-amber">Draft</span>`}
       </td>
-      <td class="mono" style="font-size:12px">${fmt$(staffTotal)}</td>
-      <td class="mono" style="font-size:12px">${fmt$(suppTotal)}</td>
+      <td class="mono" style="font-size:12px">${p.studentsServed != null ? p.studentsServed : "—"}</td>
+      <td class="mono" style="font-size:12px">${fmt$(personnel)}</td>
+      <td class="mono" style="font-size:12px">${fmt$(nonPersonnel)}</td>
       <td class="mono" style="font-size:12px;font-weight:600">${fmt$(grand)}</td>
       <td style="font-size:12px;color:var(--muted)">${esc(p.submittedBy || "—")}</td>
     </tr>`;

@@ -146,3 +146,6 @@ remotion-viz/out/
 
 __pycache__/
 *.pyc
+
+# Runtime plan data (lives on the /data volume in production)
+plans.json

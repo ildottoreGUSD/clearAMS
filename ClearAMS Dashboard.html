@@ -903,74 +903,102 @@ function planTotal(items) {
   return items.reduce((s, it) => s + (parseFloat(it.amount) || 0), 0);
 }
 
-function PlanLineItems({ items, onChange, maxLabel, maxAmt, color }) {
-  const addItem = () => onChange([...items, { id: crypto.randomUUID(), description: "", amount: "" }]);
+function PlanLineItems({ items, onChange, maxAmt, fields, addLabel="+ Add line item", disabled=false }) {
+  const blank = () => {
+    const o = { id: crypto.randomUUID(), amount: "" };
+    fields.forEach(f => { o[f.key] = f.default ?? ""; });
+    return o;
+  };
+  const addItem = () => onChange([...items, blank()]);
   const removeItem = (id) => onChange(items.filter(it => it.id !== id));
   const updateItem = (id, field, val) =>
     onChange(items.map(it => it.id === id ? { ...it, [field]: val } : it));
 
   const total = planTotal(items);
   const overMax = maxAmt > 0 && total > maxAmt;
+  const gridCols = [...fields.map(f => f.width || "1fr"), "150px"].join(" ") + (disabled ? "" : " 36px");
+  const inputStyle = {
+    fontSize:13, padding:"6px 9px", border:"1px solid var(--line)",
+    borderRadius:6, fontFamily:"inherit", color:"var(--ink)", outline:"none",
+    width:"100%", boxSizing:"border-box",
+    background: disabled ? "#f8fafc" : "white"
+  };
 
   return (
     <div>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
-        <div style={{ fontSize:11, color:"var(--muted)" }}>
-          Max allowed: <strong style={{ color: overMax ? "var(--red)" : "var(--ink)" }}>{fmt$(maxAmt)}</strong>
-          {overMax && <span style={{ color:"var(--red)", marginLeft:6 }}>⚠ Over limit</span>}
+      {maxAmt > 0 && (
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"flex-end", marginBottom:10 }}>
+          <div style={{ fontSize:11, color:"var(--muted)" }}>
+            Within budget: <strong style={{ color: overMax ? "var(--red)" : "var(--ink)" }}>{fmt$(maxAmt)}</strong>
+            {overMax && <span style={{ color:"var(--red)", marginLeft:6 }}>⚠ Over limit</span>}
+          </div>
         </div>
-        <button onClick={addItem} style={{
-          display:"inline-flex", alignItems:"center", gap:5,
-          fontSize:12, fontWeight:600, color:"var(--blue)",
-          background:"var(--blue-soft)", border:"1px solid #BFDBFE",
-          borderRadius:6, padding:"5px 10px", cursor:"pointer"
-        }}>+ Add line item</button>
-      </div>
+      )}
 
       {items.length === 0 ? (
         <div style={{ textAlign:"center", padding:"20px 0", fontSize:13, color:"var(--muted)",
           border:"1px dashed var(--line)", borderRadius:8 }}>
-          No items yet — click "+ Add line item"
+          No items yet{disabled ? "." : ` — click "${addLabel}"`}
         </div>
       ) : (
         <div style={{ border:"1px solid var(--line)", borderRadius:8, overflow:"hidden" }}>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 140px 36px",
+          <div style={{ display:"grid", gridTemplateColumns:gridCols,
             background:"var(--surface)", borderBottom:"1px solid var(--line)",
             padding:"7px 12px", fontSize:10.5, fontWeight:600, color:"var(--muted)",
-            textTransform:"uppercase", letterSpacing:".07em" }}>
-            <span>Description</span><span>Amount</span><span />
+            textTransform:"uppercase", letterSpacing:".07em", gap:8 }}>
+            {fields.map(f => <span key={f.key}>{f.label}</span>)}
+            <span>Amount</span>{!disabled && <span />}
           </div>
           {items.map((it, i) => (
             <div key={it.id} style={{
-              display:"grid", gridTemplateColumns:"1fr 140px 36px", alignItems:"center",
+              display:"grid", gridTemplateColumns:gridCols, alignItems:"center",
               padding:"7px 8px 7px 12px", gap:8,
               borderBottom: i < items.length - 1 ? "1px solid var(--line-2)" : "none",
               background:"white"
             }}>
-              <input value={it.description} placeholder="Describe the expenditure…"
-                onChange={e => updateItem(it.id, "description", e.target.value)}
-                style={{ fontSize:13, padding:"6px 9px", border:"1px solid var(--line)",
-                  borderRadius:6, fontFamily:"inherit", color:"var(--ink)", outline:"none", width:"100%" }} />
+              {fields.map(f => f.type === "select" ? (
+                <select key={f.key} value={it[f.key] || ""} disabled={disabled}
+                  onChange={e => updateItem(it.id, f.key, e.target.value)}
+                  style={{ ...inputStyle, cursor: disabled ? "default" : "pointer" }}>
+                  <option value="" disabled>{f.placeholder}</option>
+                  {f.options.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              ) : (
+                <input key={f.key} value={it[f.key] || ""} placeholder={f.placeholder} disabled={disabled}
+                  onChange={e => updateItem(it.id, f.key, e.target.value)}
+                  style={inputStyle} />
+              ))}
               <div style={{ position:"relative" }}>
                 <span style={{ position:"absolute", left:9, top:"50%", transform:"translateY(-50%)",
                   fontSize:13, color:"var(--muted)", pointerEvents:"none" }}>$</span>
-                <input type="number" min="0" step="0.01" value={it.amount} placeholder="0"
+                <input type="number" min="0" step="0.01" value={it.amount} placeholder="0" disabled={disabled}
                   onChange={e => updateItem(it.id, "amount", e.target.value)}
-                  style={{ fontSize:13, padding:"6px 9px 6px 20px", border:"1px solid var(--line)",
-                    borderRadius:6, fontFamily:"Geist Mono, monospace", color:"var(--ink)",
-                    outline:"none", width:"100%" }} />
+                  style={{ ...inputStyle, padding:"6px 9px 6px 20px", fontFamily:"Geist Mono, monospace" }} />
               </div>
-              <button onClick={() => removeItem(it.id)} style={{
-                width:28, height:28, borderRadius:6, border:"1px solid var(--line)",
-                background:"white", cursor:"pointer", color:"var(--muted)",
-                display:"flex", alignItems:"center", justifyContent:"center", fontSize:14
-              }}>×</button>
+              {!disabled && (
+                <button onClick={() => removeItem(it.id)} style={{
+                  width:28, height:28, borderRadius:6, border:"1px solid var(--line)",
+                  background:"white", cursor:"pointer", color:"var(--muted)",
+                  display:"flex", alignItems:"center", justifyContent:"center", fontSize:14
+                }}>×</button>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      <div style={{ marginTop:8, textAlign:"right", fontSize:12, fontWeight:700,
+      {!disabled && (
+        <div style={{ marginTop:10 }}>
+          <button onClick={addItem} style={{
+            display:"inline-flex", alignItems:"center", gap:5,
+            fontSize:12, fontWeight:600, color:"var(--blue)",
+            background:"var(--blue-soft)", border:"1px solid #BFDBFE",
+            borderRadius:6, padding:"6px 12px", cursor:"pointer"
+          }}>{addLabel}</button>
+        </div>
+      )}
+
+      <div style={{ marginTop:10, textAlign:"right", fontSize:12, fontWeight:700,
         color: overMax ? "var(--red)" : "var(--ink)" }}>
         Total: {fmt$(total)}
         {overMax && <span style={{ fontSize:11, fontWeight:400, color:"var(--red)", marginLeft:6 }}>
@@ -981,41 +1009,74 @@ function PlanLineItems({ items, onChange, maxLabel, maxAmt, color }) {
   );
 }
 
+const PLAN_STEPS = [
+  { key:"ack",      label:"Disclaimers" },
+  { key:"info",     label:"School Info" },
+  { key:"cert",     label:"Certificated" },
+  { key:"class",    label:"Classified" },
+  { key:"supplies", label:"Supplies" },
+  { key:"services", label:"Services" },
+  { key:"review",   label:"Review" },
+];
+
+function PlanReminder({ tone="info", children }) {
+  const palette = {
+    info:  { bg:"var(--blue-soft)", bd:"#BFDBFE", fg:"#1E40AF" },
+    warn:  { bg:"#FEF3C7",          bd:"#FDE68A", fg:"#92400E" },
+  }[tone];
+  return (
+    <div style={{ background:palette.bg, border:`1px solid ${palette.bd}`, borderRadius:8,
+      padding:"10px 14px", fontSize:12, color:palette.fg, lineHeight:1.55, marginBottom:12 }}>
+      {children}
+    </div>
+  );
+}
+
 function PlanEditor({ schoolId, fiscalYear, onBack, user }) {
-  const school    = SCHOOLS[schoolId];
-  const yearLabel = PLAN_YEARS[fiscalYear] || fiscalYear;
+  const school     = SCHOOLS[schoolId];
+  const yearLabel  = PLAN_YEARS[fiscalYear] || fiscalYear;
   const isUpcoming = fiscalYear === "fy2627";
+  const isElementary = school.name.includes(" ES") || school.name.includes("Preschool");
 
-  // Allocation: for upcoming year, default to prior year allocation as estimate
-  const officialAlloc = school[fiscalYear]?.allocation ?? null;
-  const fallbackAlloc = isUpcoming ? (school.fy2526?.allocation ?? 0) : (officialAlloc ?? 0);
+  // Allocation auto-populates: floored to nearest $10 from prior-year allocation (upcoming),
+  // otherwise the official allocation on record.
+  const alloc = isUpcoming
+    ? Math.floor((school.fy2526?.allocation ?? 0) / 10) * 10
+    : (school[fiscalYear]?.allocation ?? 0);
 
-  const [allocEstimate,      setAllocEstimate]      = useState(null);
-  const [programDescription, setProgramDescription] = useState("");
-  const [staffing,           setStaffing]           = useState([]);
-  const [supplies,           setSupplies]           = useState([]);
-  const [status,             setStatus]             = useState("draft");
-  const [submittedAt,        setSubmittedAt]        = useState(null);
-  const [submittedBy,        setSubmittedBy]        = useState(null);
-  const [savedAt,            setSavedAt]            = useState(null);
-  const [loading,            setLoading]            = useState(true);
-  const [saving,             setSaving]             = useState(false);
-  const [msg,                setMsg]                = useState(null);
-  const [confirmSubmit,      setConfirmSubmit]      = useState(false);
+  const [step,          setStep]          = useState(0);
+  const [acknowledged,  setAcknowledged]  = useState(false);
+  const [principalName, setPrincipalName] = useState("");
+  const [studentsServed,setStudentsServed]= useState("");
+  const [certificated,  setCertificated]  = useState([]);
+  const [classified,    setClassified]    = useState([]);
+  const [supplies,      setSupplies]      = useState([]);
+  const [services,      setServices]      = useState([]);
+  const [status,        setStatus]        = useState("draft");
+  const [submittedAt,   setSubmittedAt]   = useState(null);
+  const [submittedBy,   setSubmittedBy]   = useState(null);
+  const [savedAt,       setSavedAt]       = useState(null);
+  const [loading,       setLoading]       = useState(true);
+  const [saving,        setSaving]        = useState(false);
+  const [msg,           setMsg]           = useState(null);
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
 
-  const alloc      = allocEstimate !== null ? allocEstimate : fallbackAlloc;
-  const maxStaff   = alloc * 0.80;
-  const maxSupply  = alloc * 0.20;
-  const staffTotal = planTotal(staffing);
-  const suppTotal  = planTotal(supplies);
-  const grandTotal = staffTotal + suppTotal;
-  const pct        = alloc > 0 ? Math.min(grandTotal / alloc, 1) : 0;
-  const overBudget = grandTotal > alloc;
-  const overStaff  = staffTotal > maxStaff;
-  const overSupply = suppTotal  > maxSupply;
-  const isLocked   = status === "submitted";
+  const certTotal     = planTotal(certificated);
+  const classTotal    = planTotal(classified);
+  const suppTotal     = planTotal(supplies);
+  const servTotal     = planTotal(services);
+  const personnel     = certTotal + classTotal;
+  const nonPersonnel  = suppTotal + servTotal;
+  const grandTotal    = personnel + nonPersonnel;
+  const maxNonPers    = alloc * 0.20;
+  const minPersonnel  = alloc * 0.80;
+  const pct           = alloc > 0 ? Math.min(grandTotal / alloc, 1) : 0;
+  const overBudget    = grandTotal > alloc;
+  const overNonPers   = nonPersonnel > maxNonPers;
+  const personnelShort= grandTotal > 0 && personnel < minPersonnel;
+  const isLocked      = status === "submitted";
 
-  // Load existing plan
+  // Load existing plan + resume to last step
   useEffect(() => {
     const token = sessionStorage.getItem("clearams_token");
     fetch(`/api/plan/${schoolId}/${fiscalYear}`, {
@@ -1023,42 +1084,62 @@ function PlanEditor({ schoolId, fiscalYear, onBack, user }) {
     })
       .then(r => r.json())
       .then(d => {
-        if (d.staffing)           setStaffing(d.staffing);
-        if (d.supplies)           setSupplies(d.supplies);
-        if (d.programDescription !== undefined) setProgramDescription(d.programDescription);
-        if (d.allocEstimate != null) setAllocEstimate(d.allocEstimate);
-        if (d.status)             setStatus(d.status);
-        if (d.submittedAt)        setSubmittedAt(d.submittedAt);
-        if (d.submittedBy)        setSubmittedBy(d.submittedBy);
-        if (d.savedAt)            setSavedAt(d.savedAt);
+        if (d.acknowledged != null)  setAcknowledged(!!d.acknowledged);
+        if (d.principalName)         setPrincipalName(d.principalName);
+        if (d.studentsServed != null) setStudentsServed(String(d.studentsServed));
+        if (d.certificated)          setCertificated(d.certificated);
+        if (d.classified)            setClassified(d.classified);
+        if (d.supplies)              setSupplies(d.supplies);
+        if (d.services)              setServices(d.services);
+        if (d.status)                setStatus(d.status);
+        if (d.submittedAt)           setSubmittedAt(d.submittedAt);
+        if (d.submittedBy)           setSubmittedBy(d.submittedBy);
+        if (d.savedAt)               setSavedAt(d.savedAt);
+        if (d.status === "submitted") setStep(PLAN_STEPS.length - 1);
+        else if (typeof d.currentStep === "number")
+          setStep(Math.min(Math.max(d.currentStep, 0), PLAN_STEPS.length - 1));
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [schoolId, fiscalYear]);
 
-  const buildPayload = () => ({
-    allocEstimate:      alloc,
-    programDescription,
-    staffing,
-    supplies,
+  const buildPayload = (stepValue = step) => ({
+    currentStep:    stepValue,
+    acknowledged,
+    principalName,
+    studentsServed: studentsServed === "" ? null : Number(studentsServed),
+    allocation:     alloc,
+    certificated, classified, supplies, services,
   });
 
-  const saveDraft = async () => {
+  const saveDraft = async (stepValue = step, silent = false) => {
     setSaving(true);
-    setMsg(null);
+    if (!silent) setMsg(null);
     try {
       const token = sessionStorage.getItem("clearams_token");
       const res = await fetch(`/api/plan/${schoolId}/${fiscalYear}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify(buildPayload()),
+        body: JSON.stringify(buildPayload(stepValue)),
       });
       const d = await res.json();
-      if (d.ok) { setSavedAt(new Date().toISOString()); setMsg({ type:"ok", text:"Draft saved." }); }
-      else setMsg({ type:"err", text: d.error || "Save failed." });
-    } catch { setMsg({ type:"err", text:"Network error." }); }
+      if (d.ok) { setSavedAt(new Date().toISOString()); if (!silent) setMsg({ type:"ok", text:"Draft saved." }); }
+      else if (!silent) setMsg({ type:"err", text: d.error || "Save failed." });
+    } catch { if (!silent) setMsg({ type:"err", text:"Network error." }); }
     setSaving(false);
-    setTimeout(() => setMsg(null), 3000);
+    if (!silent) setTimeout(() => setMsg(null), 3000);
+  };
+
+  const goTo = (n) => {
+    const clamped = Math.min(Math.max(n, 0), PLAN_STEPS.length - 1);
+    if (!isLocked) saveDraft(clamped, true);
+    setStep(clamped);
+    window.scrollTo(0, 0);
+  };
+
+  const saveAndExit = async () => {
+    if (!isLocked) await saveDraft(step, true);
+    onBack();
   };
 
   const submitPlan = async () => {
@@ -1070,7 +1151,7 @@ function PlanEditor({ schoolId, fiscalYear, onBack, user }) {
       const res = await fetch(`/api/plan/${schoolId}/${fiscalYear}/submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify(buildPayload()),
+        body: JSON.stringify(buildPayload(PLAN_STEPS.length - 1)),
       });
       const d = await res.json();
       if (d.ok) {
@@ -1091,13 +1172,97 @@ function PlanEditor({ schoolId, fiscalYear, onBack, user }) {
     </div>
   );
 
+  const submitBlocked = !acknowledged || !principalName.trim() || studentsServed === ""
+    || grandTotal === 0 || overBudget || overNonPers;
+
+  const stepCanProceed =
+    step === 0 ? acknowledged :
+    step === 1 ? (principalName.trim() !== "" && studentsServed !== "" && Number(studentsServed) >= 0) :
+    true;
+
+  // ── Compliance strip (shown on money steps + review) ──────────────────────────
+  const ComplianceStrip = () => (
+    <div className="card" style={{ padding:"16px 20px", marginBottom:20 }}>
+      <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:12, gap:16 }}>
+        <div>
+          <div className="eyebrow" style={{ marginBottom:4 }}>Allocation</div>
+          <div className="serif" style={{ fontSize:24, lineHeight:1, color:"var(--ink)" }}>{fmt$(alloc)}</div>
+        </div>
+        <div style={{ textAlign:"right" }}>
+          <div className="eyebrow" style={{ marginBottom:4 }}>Planned</div>
+          <div className="mono" style={{ fontSize:20, fontWeight:700, color: overBudget ? "var(--red)" : "var(--ink)" }}>
+            {fmt$(grandTotal)}
+          </div>
+          <div style={{ fontSize:11, color:"var(--muted)", marginTop:2 }}>
+            of {fmt$(alloc)} ({alloc > 0 ? fmtPct(grandTotal/alloc) : "0%"})
+            {overBudget && <span style={{ color:"var(--red)", marginLeft:6, fontWeight:700 }}>⚠ Over allocation</span>}
+          </div>
+        </div>
+      </div>
+      <div style={{ height:8, background:"#EDF0F5", borderRadius:999, overflow:"hidden", marginBottom:10 }}>
+        <div style={{ height:"100%", borderRadius:999, transition:"width .3s",
+          width:`${Math.min(pct*100,100)}%`,
+          background: overBudget ? "#DC2626" : pct > 0.95 ? "#B45309" : "#1D4ED8" }} />
+      </div>
+      <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+          <span style={{ width:10, height:10, borderRadius:2, background:"#1D4ED8", display:"inline-block" }} />
+          <span style={{ fontSize:12, color:"var(--ink)" }}>
+            Personnel: <strong className="mono">{fmt$(personnel)}</strong>
+            <span style={{ color: personnelShort ? "var(--red)" : "var(--muted)", marginLeft:4 }}>
+              / {fmt$(minPersonnel)} min (80%)
+            </span>
+            {personnelShort && <span style={{ color:"var(--red)", marginLeft:4, fontWeight:700 }}>⚠ Below 80%</span>}
+          </span>
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+          <span style={{ width:10, height:10, borderRadius:2, background:"#0D9488", display:"inline-block" }} />
+          <span style={{ fontSize:12, color:"var(--ink)" }}>
+            Supplies + Services: <strong className="mono">{fmt$(nonPersonnel)}</strong>
+            <span style={{ color: overNonPers ? "var(--red)" : "var(--muted)", marginLeft:4 }}>
+              / {fmt$(maxNonPers)} max (20%)
+            </span>
+            {overNonPers && <span style={{ color:"var(--red)", marginLeft:4, fontWeight:700 }}>⚠ Over</span>}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+
+  const SummaryRow = ({ label, items, fields }) => (
+    <div style={{ marginBottom:18 }}>
+      <div style={{ fontSize:12, fontWeight:700, color:"var(--ink)", marginBottom:6 }}>
+        {label} <span className="mono" style={{ color:"var(--muted)", fontWeight:600 }}>· {fmt$(planTotal(items))}</span>
+      </div>
+      {items.length === 0 ? (
+        <div style={{ fontSize:12, color:"var(--muted)", fontStyle:"italic" }}>None listed.</div>
+      ) : (
+        <div style={{ border:"1px solid var(--line)", borderRadius:8, overflow:"hidden" }}>
+          {items.map((it, i) => (
+            <div key={it.id} style={{ display:"flex", justifyContent:"space-between", gap:12,
+              padding:"7px 12px", fontSize:12.5, color:"var(--ink)",
+              borderBottom: i < items.length-1 ? "1px solid var(--line-2)" : "none", background:"white" }}>
+              <span>{fields.map(f => it[f]).filter(Boolean).join(" · ") || "—"}</span>
+              <span className="mono" style={{ flexShrink:0 }}>{fmt$(parseFloat(it.amount)||0)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const sectionTitle = (t, sub) => (
+    <div style={{ marginBottom:16 }}>
+      <div style={{ fontSize:18, fontWeight:700, color:"var(--ink)", letterSpacing:"-.01em" }}>{t}</div>
+      {sub && <div style={{ fontSize:13, color:"var(--muted)", marginTop:4, lineHeight:1.55 }}>{sub}</div>}
+    </div>
+  );
+
   return (
     <div style={{ minHeight:"100vh", background:"var(--surface)" }} id="plan-editor">
-
-      {/* Print styles */}
       <style>{`
         @media print {
-          #plan-editor-toolbar, #plan-editor-actions { display: none !important; }
+          #plan-editor-toolbar, #plan-editor-actions, #plan-stepper { display: none !important; }
           #plan-editor { background: white !important; }
           body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
@@ -1107,10 +1272,10 @@ function PlanEditor({ schoolId, fiscalYear, onBack, user }) {
       <div id="plan-editor-toolbar" className="hairline-b" style={{ background:"white", position:"sticky", top:0, zIndex:10 }}>
         <div className="mx-auto px-10 py-3 flex items-center justify-between" style={{ maxWidth:900 }}>
           <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-            <button onClick={onBack} style={{ background:"none", border:"1px solid var(--line)",
+            <button onClick={saveAndExit} style={{ background:"none", border:"1px solid var(--line)",
               borderRadius:7, padding:"6px 12px", fontSize:13, fontWeight:500, cursor:"pointer",
               display:"flex", alignItems:"center", gap:6, color:"var(--ink)" }}>
-              ← Back
+              {isLocked ? "← Back" : "← Save & Exit"}
             </button>
             <div>
               <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", letterSpacing:"-.01em" }}>
@@ -1139,176 +1304,324 @@ function PlanEditor({ schoolId, fiscalYear, onBack, user }) {
         </div>
       </div>
 
+      {/* Stepper */}
+      {!isLocked && (
+        <div id="plan-stepper" style={{ background:"white", borderBottom:"1px solid var(--line)" }}>
+          <div className="mx-auto px-10" style={{ maxWidth:900, display:"flex", gap:6, flexWrap:"wrap",
+            paddingTop:10, paddingBottom:10 }}>
+            {PLAN_STEPS.map((s, i) => {
+              const active = i === step;
+              const done   = i < step;
+              return (
+                <button key={s.key} onClick={() => goTo(i)} disabled={i > step && !stepCanProceed}
+                  style={{
+                    display:"inline-flex", alignItems:"center", gap:6, cursor:"pointer",
+                    fontSize:11.5, fontWeight:600, padding:"5px 11px", borderRadius:999,
+                    border: active ? "1px solid var(--navy)" : "1px solid var(--line)",
+                    background: active ? "var(--navy)" : done ? "var(--blue-soft)" : "white",
+                    color: active ? "white" : done ? "#1E40AF" : "var(--muted)",
+                  }}>
+                  <span style={{
+                    width:16, height:16, borderRadius:"50%", display:"inline-flex",
+                    alignItems:"center", justifyContent:"center", fontSize:10, fontWeight:700,
+                    background: active ? "rgba(255,255,255,.2)" : done ? "#1E40AF" : "var(--surface)",
+                    color: active ? "white" : done ? "white" : "var(--muted)",
+                  }}>{done ? "✓" : i + 1}</span>
+                  {s.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="mx-auto px-10 py-8" style={{ maxWidth:900 }}>
 
-        {/* Submitted banner */}
-        {isLocked && (
-          <div style={{ background:"var(--green-soft)", border:"1px solid #A7F3D0", borderRadius:10,
-            padding:"14px 20px", marginBottom:24, display:"flex", alignItems:"center", gap:12 }}>
-            <span style={{ fontSize:18 }}>✓</span>
-            <div>
-              <div style={{ fontSize:13, fontWeight:700, color:"var(--green)" }}>Plan submitted</div>
-              <div style={{ fontSize:12, color:"var(--green)", opacity:.8, marginTop:2 }}>
-                Submitted by {submittedBy} on {new Date(submittedAt).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}. Contact GUSD VAPA to request changes.
+        {/* Submitted → read-only summary */}
+        {isLocked ? (
+          <div>
+            <div style={{ background:"var(--green-soft)", border:"1px solid #A7F3D0", borderRadius:10,
+              padding:"14px 20px", marginBottom:24, display:"flex", alignItems:"center", gap:12 }}>
+              <span style={{ fontSize:18 }}>✓</span>
+              <div>
+                <div style={{ fontSize:13, fontWeight:700, color:"var(--green)" }}>Plan submitted</div>
+                <div style={{ fontSize:12, color:"var(--green)", opacity:.8, marginTop:2 }}>
+                  Submitted by {submittedBy} on {new Date(submittedAt).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}. Contact GUSD VAPA to request changes.
+                </div>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Allocation bar */}
-        <div className="card" style={{ padding:"20px 24px", marginBottom:20 }}>
-          <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:14, gap:16 }}>
-            <div style={{ flex:1 }}>
-              <div className="eyebrow" style={{ marginBottom:6 }}>
-                {isUpcoming ? "Estimated Allocation (FY 2025–26 basis)" : "Allocation"}
+            <ComplianceStrip />
+            <div className="card" style={{ padding:"20px 24px", marginBottom:20 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+                <div><div className="eyebrow" style={{ marginBottom:3 }}>School</div>
+                  <div style={{ fontSize:13, fontWeight:600, color:"var(--ink)" }}>{school.name}</div></div>
+                <div><div className="eyebrow" style={{ marginBottom:3 }}>Principal</div>
+                  <div style={{ fontSize:13, fontWeight:600, color:"var(--ink)" }}>{principalName || "—"}</div></div>
+                <div><div className="eyebrow" style={{ marginBottom:3 }}>Students Served</div>
+                  <div style={{ fontSize:13, fontWeight:600, color:"var(--ink)" }}>{studentsServed || "—"}</div></div>
+                <div><div className="eyebrow" style={{ marginBottom:3 }}>Allocation</div>
+                  <div style={{ fontSize:13, fontWeight:600, color:"var(--ink)" }}>{fmt$(alloc)}</div></div>
               </div>
-              {isUpcoming ? (
-                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                  <span style={{ fontSize:10, color:"#92400E", background:"#FEF3C7",
-                    border:"1px solid #FDE68A", borderRadius:999, padding:"2px 9px",
-                    fontWeight:600, whiteSpace:"nowrap" }}>
-                    ⚠ Official amount TBD — CDE publishes July 2026
-                  </span>
-                </div>
-              ) : (
-                <div className="serif" style={{ fontSize:28, lineHeight:1, color:"var(--ink)" }}>
-                  {fmt$(alloc)}
-                </div>
-              )}
-              {isUpcoming && (
-                <div style={{ display:"flex", alignItems:"center", gap:8, marginTop:8 }}>
-                  <span style={{ fontSize:12, color:"var(--muted)" }}>Planning with:</span>
-                  <div style={{ position:"relative" }}>
-                    <span style={{ position:"absolute", left:9, top:"50%", transform:"translateY(-50%)",
-                      fontSize:13, color:"var(--muted)", pointerEvents:"none" }}>$</span>
-                    <input type="number" disabled={isLocked} value={alloc} min="0" step="1"
-                      onChange={e => setAllocEstimate(parseFloat(e.target.value) || 0)}
-                      style={{ fontSize:14, fontWeight:700, padding:"6px 9px 6px 20px",
-                        border:"1px solid var(--line)", borderRadius:7,
-                        fontFamily:"Geist Mono, monospace", color:"var(--ink)", outline:"none",
-                        width:160, background: isLocked ? "#f8fafc" : "white" }} />
+            </div>
+            <div className="card" style={{ padding:"20px 24px", marginBottom:20 }}>
+              <SummaryRow label="Certificated Salaries" items={certificated} fields={["role"]} />
+              <SummaryRow label="Classified Salaries (VAPA Assistants)" items={classified} fields={["hireType","role"]} />
+              <SummaryRow label="Supplies & Materials" items={supplies} fields={["description"]} />
+              <SummaryRow label="Services & Other Operating Expenses" items={services} fields={["description"]} />
+            </div>
+          </div>
+        ) : (
+        <div>
+
+          {/* STEP 0 — Disclaimers */}
+          {step === 0 && (
+            <div>
+              {sectionTitle("Before you begin",
+                "Please read the following compliance requirements, deadlines, and review process, then acknowledge to continue. Your progress is saved automatically — you can leave and resume from where you left off.")}
+
+              <div className="card" style={{ padding:"22px 26px", marginBottom:18 }}>
+                <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", marginBottom:10 }}>Important Compliance &amp; Deadlines</div>
+                <ul style={{ margin:0, paddingLeft:20, fontSize:13, color:"var(--ink)", lineHeight:1.7 }}>
+                  <li><strong>Funding Sunset Date:</strong> June 30, 2029 (please adhere to GUSD purchasing cut-off dates).</li>
+                  <li><strong>Spending Requirement:</strong> A GUSD VAPA Department-reviewed and SSC-approved plan must be in place before any funds are encumbered or spent.</li>
+                  <li><strong>Plan due to Dr. Ahangarzadeh no later than September 15.</strong></li>
+                </ul>
+              </div>
+
+              <div className="card" style={{ padding:"22px 26px", marginBottom:18 }}>
+                <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", marginBottom:10 }}>Review &amp; Approval Process</div>
+                <ul style={{ margin:0, paddingLeft:20, fontSize:13, color:"var(--ink)", lineHeight:1.7 }}>
+                  <li>When you submit your responses in this plan builder, a Google Doc version of the completed plan will appear in your GUSD Google Drive account. Please share the document with <a href="mailto:eahangarzadeh@gusd.net" style={{ color:"var(--blue)" }}>eahangarzadeh@gusd.net</a> as a <strong>Commenter</strong>. Dr. Ahangarzadeh will provide compliance feedback for your review, prior to presenting the plan to your School Site Council (SSC).</li>
+                  <li>Once reviewed, the plan must be presented to and approved by the SSC.</li>
+                  <li>Any subsequent changes or updates to this plan require re-approval by the SSC.</li>
+                  <li>The draft and final versions of the plan should be submitted by the school principal.</li>
+                  <li>Any item/service/resource costing <strong>$500 or more</strong> should be itemized in the plan by category (e.g., Clay supply from Blick Arts, $640; Laptop for Media Arts class, $1,355). Do not lump all supplies into a single general category.</li>
+                </ul>
+              </div>
+
+              <div className="card" style={{ padding:"22px 26px", marginBottom:18 }}>
+                <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", marginBottom:10 }}>Budget Requirements</div>
+                <ul style={{ margin:0, paddingLeft:20, fontSize:13, color:"var(--ink)", lineHeight:1.7 }}>
+                  <li><strong>Minimum 80%:</strong> Certificated or Classified VAPA Personnel (including statutory benefits, where applicable).</li>
+                  <li><strong>Maximum 20%:</strong> VAPA Supplies and VAPA Services.</li>
+                </ul>
+              </div>
+
+              <label style={{ display:"flex", alignItems:"flex-start", gap:10, cursor:"pointer",
+                background:"var(--blue-soft)", border:"1px solid #BFDBFE", borderRadius:10, padding:"14px 18px" }}>
+                <input type="checkbox" checked={acknowledged}
+                  onChange={e => setAcknowledged(e.target.checked)}
+                  style={{ width:18, height:18, marginTop:1, cursor:"pointer", flexShrink:0 }} />
+                <span style={{ fontSize:13, color:"var(--ink)", lineHeight:1.5 }}>
+                  I have read and understand the compliance requirements, deadlines, and review process described above.
+                </span>
+              </label>
+            </div>
+          )}
+
+          {/* STEP 1 — School Information */}
+          {step === 1 && (
+            <div>
+              {sectionTitle("School Information")}
+              <div className="card" style={{ padding:"22px 26px", marginBottom:20 }}>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:18 }}>
+                  <div>
+                    <div className="eyebrow" style={{ marginBottom:6 }}>School</div>
+                    <div style={{ fontSize:15, fontWeight:700, color:"var(--ink)" }}>{school.name}</div>
+                  </div>
+                  <div>
+                    <div className="eyebrow" style={{ marginBottom:6 }}>Allocation (auto)</div>
+                    <div className="serif" style={{ fontSize:22, color:"var(--ink)", lineHeight:1 }}>{fmt$(alloc)}</div>
+                    <div style={{ fontSize:11, color:"var(--muted)", marginTop:4, lineHeight:1.45 }}>
+                      Rounded down to the nearest $10 from the FY 2025–26 allocation.
+                      Official CDE amount publishes July 2026.
+                    </div>
                   </div>
                 </div>
+                <div style={{ marginTop:20 }}>
+                  <label style={{ display:"block", fontSize:13, fontWeight:600, color:"var(--ink)", marginBottom:6 }}>
+                    Principal's name
+                  </label>
+                  <input value={principalName} onChange={e => setPrincipalName(e.target.value)}
+                    placeholder="Principal's full name"
+                    style={{ width:"100%", maxWidth:360, padding:"9px 12px", fontSize:13, fontFamily:"inherit",
+                      border:"1px solid var(--line)", borderRadius:8, color:"var(--ink)", outline:"none", boxSizing:"border-box" }} />
+                </div>
+                <div style={{ marginTop:20 }}>
+                  <label style={{ display:"block", fontSize:13, fontWeight:600, color:"var(--ink)", marginBottom:6 }}>
+                    How many students does your Arts &amp; Music in Schools (Prop 28) funding serve?
+                  </label>
+                  <input type="number" min="0" step="1" value={studentsServed}
+                    onChange={e => setStudentsServed(e.target.value)} placeholder="e.g., 450"
+                    style={{ width:180, padding:"9px 12px", fontSize:13, fontFamily:"Geist Mono, monospace",
+                      border:"1px solid var(--line)", borderRadius:8, color:"var(--ink)", outline:"none", boxSizing:"border-box" }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2 — Certificated Salaries */}
+          {step === 2 && (
+            <div>
+              {sectionTitle("Certificated Salaries",
+                "List each certificated VAPA position funded by Prop 28. Enter only the teacher's role (not their name) and the total cost — e.g., \"Elementary VAPA Itinerant Teacher 0.4 FTE\", $32,334. Add a line for each position.")}
+              <ComplianceStrip />
+              <PlanReminder>
+                AMS funds can only be used to <strong>expand</strong> certificated VAPA instruction, not to supplant
+                already-funded certificated VAPA instruction (i.e., a new section of choir, a new class). Extra hourly
+                pay should also be accounted for here as certificated salary.
+              </PlanReminder>
+              {isElementary && (
+                <PlanReminder tone="warn">
+                  <strong>Elementary reminder:</strong> remember to budget for your Arts Learning Leader —
+                  a <strong>$2,012 stipend</strong> for 50 non-contractual hours of service.
+                </PlanReminder>
+              )}
+              <div className="card" style={{ padding:"20px 24px" }}>
+                <PlanLineItems items={certificated} onChange={setCertificated} maxAmt={0}
+                  addLabel="+ Add certificated position"
+                  fields={[{ key:"role", label:"Role", placeholder:"e.g., Elementary VAPA Itinerant Teacher 0.4 FTE" }]} />
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3 — Classified Salaries */}
+          {step === 3 && (
+            <div>
+              {sectionTitle("Classified Salaries (VAPA Assistants)",
+                "List each classified VAPA position funded by Prop 28. For each line, state explicitly whether you are hiring a VAPA Assistant (part-time or full-time) or a Substitute VAPA Assistant, and the total cost.")}
+              <ComplianceStrip />
+              <PlanReminder tone="warn">
+                VAPA Assistants should work directly with students <strong>only under the supervision of a credentialed
+                GUSD teacher.</strong>
+              </PlanReminder>
+              <div className="card" style={{ padding:"20px 24px" }}>
+                <PlanLineItems items={classified} onChange={setClassified} maxAmt={0}
+                  addLabel="+ Add classified position"
+                  fields={[
+                    { key:"hireType", label:"Type", type:"select", placeholder:"Select type…", width:"210px",
+                      options:["VAPA Assistant — Part-time","VAPA Assistant — Full-time","Substitute VAPA Assistant"] },
+                    { key:"role", label:"Role / Notes", placeholder:"e.g., supports elementary music classes" },
+                  ]} />
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4 — Supplies */}
+          {step === 4 && (
+            <div>
+              {sectionTitle("Supplies & Materials",
+                "List VAPA supplies and materials — e.g., musical instruments, sheet music, clay, paint, easels, kilns, cameras, software licenses, or classroom furniture for arts spaces.")}
+              <ComplianceStrip />
+              <PlanReminder>
+                Itemize any single item costing <strong>$500 or more</strong> by category
+                (e.g., Clay supply from Blick Arts, $640; Laptop for Media Arts class, $1,355).
+                Do not lump all supplies into one general category. Supplies and Services together must not exceed 20% of the allocation.
+              </PlanReminder>
+              <div className="card" style={{ padding:"20px 24px" }}>
+                <PlanLineItems items={supplies} onChange={setSupplies} maxAmt={0}
+                  addLabel="+ Add supply"
+                  fields={[{ key:"description", label:"Description", placeholder:"e.g., Clay supply from Blick Arts" }]} />
+              </div>
+            </div>
+          )}
+
+          {/* STEP 5 — Services & Other Operating Expenses */}
+          {step === 5 && (
+            <div>
+              {sectionTitle("Services & Other Operating Expenses",
+                "List VAPA services and other operating expenses — e.g., guest artist / teaching-artist contracts, professional development, performance licensing, equipment rental and repair, or field trip entrance fees and transportation.")}
+              <ComplianceStrip />
+              <PlanReminder tone="warn">
+                Service Agreements or Personal Service Agreements over <strong>$15,000</strong> require Board of Education approval.
+              </PlanReminder>
+              <PlanReminder>
+                Consider including funds for <strong>professional development</strong> for your staff, as well as
+                <strong> field trip entrance fees and transportation</strong>. In LA County, students can visit the
+                Music Center, Walt Disney Concert Hall, the Broad, LACMA, the Getty, the Hollywood Bowl, or the Norton Simon Museum.
+              </PlanReminder>
+              <div className="card" style={{ padding:"20px 24px" }}>
+                <PlanLineItems items={services} onChange={setServices} maxAmt={0}
+                  addLabel="+ Add service / expense"
+                  fields={[{ key:"description", label:"Description", placeholder:"e.g., Bus transportation to the Music Center" }]} />
+              </div>
+            </div>
+          )}
+
+          {/* STEP 6 — Review & Submit */}
+          {step === 6 && (
+            <div>
+              {sectionTitle("Review & Submit",
+                "Review your plan below. Once submitted, it will be locked and sent to GUSD VAPA for review.")}
+              <ComplianceStrip />
+              <div className="card" style={{ padding:"20px 24px", marginBottom:20 }}>
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:16 }}>
+                  <div><div className="eyebrow" style={{ marginBottom:3 }}>School</div>
+                    <div style={{ fontSize:13, fontWeight:600, color:"var(--ink)" }}>{school.name}</div></div>
+                  <div><div className="eyebrow" style={{ marginBottom:3 }}>Principal</div>
+                    <div style={{ fontSize:13, fontWeight:600, color: principalName ? "var(--ink)" : "var(--red)" }}>
+                      {principalName || "Required — go back to School Info"}</div></div>
+                  <div><div className="eyebrow" style={{ marginBottom:3 }}>Students Served</div>
+                    <div style={{ fontSize:13, fontWeight:600, color: studentsServed ? "var(--ink)" : "var(--red)" }}>
+                      {studentsServed || "Required — go back to School Info"}</div></div>
+                  <div><div className="eyebrow" style={{ marginBottom:3 }}>Allocation</div>
+                    <div style={{ fontSize:13, fontWeight:600, color:"var(--ink)" }}>{fmt$(alloc)}</div></div>
+                </div>
+              </div>
+              <div className="card" style={{ padding:"20px 24px", marginBottom:20 }}>
+                <SummaryRow label="Certificated Salaries" items={certificated} fields={["role"]} />
+                <SummaryRow label="Classified Salaries (VAPA Assistants)" items={classified} fields={["hireType","role"]} />
+                <SummaryRow label="Supplies & Materials" items={supplies} fields={["description"]} />
+                <SummaryRow label="Services & Other Operating Expenses" items={services} fields={["description"]} />
+              </div>
+              {(overBudget || overNonPers || personnelShort || submitBlocked) && (
+                <PlanReminder tone="warn">
+                  {overBudget && <div>• Planned total exceeds the allocation. Reduce line items to continue.</div>}
+                  {overNonPers && <div>• Supplies + Services exceed 20% of the allocation.</div>}
+                  {personnelShort && !overBudget && <div>• Personnel is below the 80% minimum — adjust before submitting.</div>}
+                  {!principalName.trim() && <div>• Principal's name is required (School Info step).</div>}
+                  {studentsServed === "" && <div>• Students served is required (School Info step).</div>}
+                  {grandTotal === 0 && <div>• Add at least one budget line item before submitting.</div>}
+                </PlanReminder>
               )}
             </div>
-            <div style={{ textAlign:"right", flexShrink:0 }}>
-              <div className="eyebrow" style={{ marginBottom:4 }}>Planned</div>
-              <div className="mono" style={{ fontSize:22, fontWeight:700,
-                color: overBudget ? "var(--red)" : "var(--ink)" }}>
-                {fmt$(grandTotal)}
-              </div>
-              <div style={{ fontSize:11, color:"var(--muted)", marginTop:2 }}>
-                of {fmt$(alloc)} ({alloc > 0 ? fmtPct(grandTotal/alloc) : "0%"})
-              </div>
-            </div>
-          </div>
+          )}
 
-          {/* Progress bar */}
-          <div style={{ height:8, background:"#EDF0F5", borderRadius:999, overflow:"hidden", marginBottom:10 }}>
-            <div style={{ height:"100%", borderRadius:999, transition:"width .3s",
-              width:`${Math.min(pct*100,100)}%`,
-              background: overBudget ? "#DC2626" : pct > 0.95 ? "#B45309" : "#1D4ED8" }} />
-          </div>
-
-          {/* 80/20 breakdown */}
-          <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
-            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-              <span style={{ width:10, height:10, borderRadius:2, background:"#1D4ED8", display:"inline-block" }} />
-              <span style={{ fontSize:12, color:"var(--ink)" }}>
-                Staffing: <strong className="mono">{fmt$(staffTotal)}</strong>
-                <span style={{ color: overStaff ? "var(--red)" : "var(--muted)", marginLeft:4 }}>
-                  / {fmt$(maxStaff)} max (80%)
-                </span>
-                {overStaff && <span style={{ color:"var(--red)", marginLeft:4, fontWeight:700 }}>⚠ Over</span>}
-              </span>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", gap:6 }}>
-              <span style={{ width:10, height:10, borderRadius:2, background:"#0D9488", display:"inline-block" }} />
-              <span style={{ fontSize:12, color:"var(--ink)" }}>
-                Supplies: <strong className="mono">{fmt$(suppTotal)}</strong>
-                <span style={{ color: overSupply ? "var(--red)" : "var(--muted)", marginLeft:4 }}>
-                  / {fmt$(maxSupply)} max (20%)
-                </span>
-                {overSupply && <span style={{ color:"var(--red)", marginLeft:4, fontWeight:700 }}>⚠ Over</span>}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Program description */}
-        <div className="card" style={{ padding:"20px 24px", marginBottom:20 }}>
-          <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", marginBottom:4 }}>Program Description</div>
-          <div style={{ fontSize:12, color:"var(--muted)", marginBottom:12 }}>
-            Briefly describe the arts and music programming this funding will support.
-          </div>
-          <textarea disabled={isLocked} value={programDescription}
-            onChange={e => setProgramDescription(e.target.value)}
-            rows={4} placeholder="Describe the school's arts and music program, goals, and how Prop 28 funds will be used…"
-            style={{ width:"100%", padding:"10px 12px", fontSize:13, fontFamily:"inherit",
-              border:"1px solid var(--line)", borderRadius:8, resize:"vertical",
-              color:"var(--ink)", outline:"none", lineHeight:1.6, boxSizing:"border-box",
-              background: isLocked ? "#f8fafc" : "white" }} />
-        </div>
-
-        {/* Staffing */}
-        <div className="card" style={{ padding:"20px 24px", marginBottom:20 }}>
-          <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", marginBottom:2 }}>
-            Staffing & Personnel
-          </div>
-          <div style={{ fontSize:12, color:"var(--muted)", marginBottom:16 }}>
-            Include teachers, coaches, resident artists, and any personnel funded by Prop 28.
-            Must not exceed 80% of allocation ({fmt$(maxStaff)}).
-          </div>
-          {isLocked
-            ? <PlanLineItems items={staffing} onChange={() => {}} maxAmt={maxStaff} />
-            : <PlanLineItems items={staffing} onChange={setStaffing} maxAmt={maxStaff} />
-          }
-        </div>
-
-        {/* Supplies */}
-        <div className="card" style={{ padding:"20px 24px", marginBottom:28 }}>
-          <div style={{ fontSize:14, fontWeight:700, color:"var(--ink)", marginBottom:2 }}>
-            Supplies & Materials
-          </div>
-          <div style={{ fontSize:12, color:"var(--muted)", marginBottom:16 }}>
-            Include instruments, equipment, materials, and other non-personnel costs.
-            Must not exceed 20% of allocation ({fmt$(maxSupply)}).
-          </div>
-          {isLocked
-            ? <PlanLineItems items={supplies} onChange={() => {}} maxAmt={maxSupply} />
-            : <PlanLineItems items={supplies} onChange={setSupplies} maxAmt={maxSupply} />
-          }
-        </div>
-
-        {/* Actions */}
-        {!isLocked && (
+          {/* Navigation */}
           <div id="plan-editor-actions" style={{ display:"flex", alignItems:"center",
-            justifyContent:"space-between", gap:12 }}>
-            <div>
+            justifyContent:"space-between", gap:12, marginTop:24 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+              {step > 0 && (
+                <button onClick={() => goTo(step - 1)} disabled={saving} style={{
+                  padding:"9px 18px", fontSize:13, fontWeight:600, cursor:"pointer",
+                  border:"1px solid var(--line)", borderRadius:8, background:"white", color:"var(--ink)" }}>
+                  ← Back
+                </button>
+              )}
               {msg && (
                 <span style={{ fontSize:13, fontWeight:500,
-                  color: msg.type === "ok" ? "var(--green)" : "var(--red)" }}>
-                  {msg.text}
-                </span>
+                  color: msg.type === "ok" ? "var(--green)" : "var(--red)" }}>{msg.text}</span>
               )}
             </div>
             <div style={{ display:"flex", gap:10 }}>
-              <button onClick={saveDraft} disabled={saving} style={{
-                padding:"9px 20px", fontSize:13, fontWeight:600, cursor:"pointer",
-                border:"1px solid var(--line)", borderRadius:8, background:"white",
-                color:"var(--ink)", opacity: saving ? .5 : 1
-              }}>
-                {saving ? "Saving…" : "Save Draft"}
-              </button>
-              <button onClick={() => setConfirmSubmit(true)} disabled={saving || overBudget || overStaff || overSupply || grandTotal === 0}
-                style={{ padding:"9px 20px", fontSize:13, fontWeight:600, cursor:"pointer",
-                  border:"none", borderRadius:8, background:"var(--navy)", color:"white",
-                  opacity: (saving || overBudget || overStaff || overSupply || grandTotal === 0) ? .45 : 1
-                }}>
-                Submit Plan →
-              </button>
+              {step < PLAN_STEPS.length - 1 ? (
+                <button onClick={() => goTo(step + 1)} disabled={saving || !stepCanProceed}
+                  style={{ padding:"9px 22px", fontSize:13, fontWeight:600, cursor:"pointer",
+                    border:"none", borderRadius:8, background:"var(--navy)", color:"white",
+                    opacity: (saving || !stepCanProceed) ? .45 : 1 }}>
+                  {step === 0 ? "Acknowledge & Continue →" : "Save & Continue →"}
+                </button>
+              ) : (
+                <button onClick={() => setConfirmSubmit(true)} disabled={saving || submitBlocked}
+                  style={{ padding:"9px 22px", fontSize:13, fontWeight:600, cursor:"pointer",
+                    border:"none", borderRadius:8, background:"var(--navy)", color:"white",
+                    opacity: (saving || submitBlocked) ? .45 : 1 }}>
+                  Submit Plan →
+                </button>
+              )}
             </div>
           </div>
+        </div>
         )}
 
         {/* Footer */}
@@ -1327,12 +1640,13 @@ function PlanEditor({ schoolId, fiscalYear, onBack, user }) {
         }}>
           <div onClick={e => e.stopPropagation()} style={{
             background:"white", borderRadius:16, padding:"28px 32px",
-            maxWidth:420, width:"100%", boxShadow:"0 24px 64px rgba(11,27,51,.22)"
+            maxWidth:440, width:"100%", boxShadow:"0 24px 64px rgba(11,27,51,.22)"
           }}>
             <div style={{ fontSize:17, fontWeight:700, color:"var(--ink)", marginBottom:8 }}>Submit plan?</div>
             <p style={{ fontSize:13, color:"var(--muted)", lineHeight:1.65, marginBottom:20 }}>
               Once submitted, your {yearLabel} Site Expenditure Plan will be locked and sent to GUSD VAPA for review.
-              You won't be able to make further edits without contacting Dr. Ahangarzadeh.
+              A Google Doc version will appear in your GUSD Google Drive — remember to share it with
+              eahangarzadeh@gusd.net as a Commenter. You won't be able to make further edits without contacting Dr. Ahangarzadeh.
             </p>
             <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
               <button onClick={() => setConfirmSubmit(false)} style={{

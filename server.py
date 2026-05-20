@@ -338,30 +338,43 @@ def get_plan(email, user, school_id, year):
     return jsonify(plans.get(f"{school_id}_{year}", {}))
 
 
+def _build_plan(school_id, year, data, existing, email):
+    """Assemble a plan record from request data, falling back to existing values."""
+    def pick(field, default):
+        return data.get(field, existing.get(field, default))
+    return {
+        "schoolId":      school_id,
+        "fiscalYear":    year,
+        "currentStep":   data.get("currentStep", existing.get("currentStep", 0)),
+        "acknowledged":  pick("acknowledged", False),
+        "principalName": pick("principalName", ""),
+        "studentsServed": pick("studentsServed", None),
+        "allocation":    pick("allocation", None),
+        "certificated":  pick("certificated", []),
+        "classified":    pick("classified", []),
+        "supplies":      pick("supplies", []),
+        "services":      pick("services", []),
+        "savedAt":       _now_iso(),
+        "savedBy":       email,
+        "submittedAt":   existing.get("submittedAt"),
+        "submittedBy":   existing.get("submittedBy"),
+    }
+
+
 @app.route("/api/plan/<school_id>/<year>", methods=["POST"])
 @require_session
 def save_plan(email, user, school_id, year):
     if school_id not in _school_ids(user):
         return jsonify({"error": "Access denied"}), 403
-    data    = request.json or {}
-    plans   = load_plans()
-    key     = f"{school_id}_{year}"
+    data     = request.json or {}
+    plans    = load_plans()
+    key      = f"{school_id}_{year}"
     existing = plans.get(key, {})
     if existing.get("status") == "submitted":
         return jsonify({"error": "Plan already submitted and locked."}), 400
-    plans[key] = {
-        "schoolId":           school_id,
-        "fiscalYear":         year,
-        "status":             "draft",
-        "allocEstimate":      data.get("allocEstimate", existing.get("allocEstimate")),
-        "programDescription": data.get("programDescription", ""),
-        "staffing":           data.get("staffing", []),
-        "supplies":           data.get("supplies", []),
-        "savedAt":            _now_iso(),
-        "savedBy":            email,
-        "submittedAt":        existing.get("submittedAt"),
-        "submittedBy":        existing.get("submittedBy"),
-    }
+    record = _build_plan(school_id, year, data, existing, email)
+    record["status"] = "draft"
+    plans[key] = record
     save_plans(plans)
     return jsonify({"ok": True})
 
@@ -371,25 +384,17 @@ def save_plan(email, user, school_id, year):
 def submit_plan(email, user, school_id, year):
     if school_id not in _school_ids(user):
         return jsonify({"error": "Access denied"}), 403
-    data    = request.json or {}
-    plans   = load_plans()
-    key     = f"{school_id}_{year}"
+    data     = request.json or {}
+    plans    = load_plans()
+    key      = f"{school_id}_{year}"
     existing = plans.get(key, {})
     if existing.get("status") == "submitted":
         return jsonify({"error": "Plan already submitted."}), 400
-    plans[key] = {
-        "schoolId":           school_id,
-        "fiscalYear":         year,
-        "status":             "submitted",
-        "allocEstimate":      data.get("allocEstimate", existing.get("allocEstimate")),
-        "programDescription": data.get("programDescription", ""),
-        "staffing":           data.get("staffing", []),
-        "supplies":           data.get("supplies", []),
-        "savedAt":            _now_iso(),
-        "savedBy":            email,
-        "submittedAt":        _now_iso(),
-        "submittedBy":        email,
-    }
+    record = _build_plan(school_id, year, data, existing, email)
+    record["status"]      = "submitted"
+    record["submittedAt"] = _now_iso()
+    record["submittedBy"] = email
+    plans[key] = record
     save_plans(plans)
     return jsonify({"ok": True})
 

@@ -1,5 +1,11 @@
 # Dev Log
 
+## 2026-05-20 (continued 6)
+- Rebuilt the Site Expenditure Plan builder as a 7-step wizard (Disclaimers → School Info → Certificated → Classified → Supplies → Services → Review & Submit) with a clickable stepper. Progress auto-saves on every Next/Back and on "Save & Exit"; `currentStep` is persisted server-side so principals can leave and resume exactly where they left off. Submitted plans render a read-only summary instead of the wizard.
+- Step 0 surfaces all compliance disclaimers (June 30 2029 sunset, SSC-approved-plan-before-spend, Sept 15 due date, Google Doc/Drive share-as-Commenter review process, $500+ itemization rule, 80/20 budget split) gated behind an acknowledgment checkbox. Step 1 auto-populates school name + allocation (floored to nearest $10 from FY25-26), with editable principal name and a "students served" field.
+- New plan data model: `acknowledged`, `principalName`, `studentsServed`, `allocation`, plus separate `certificated[]`, `classified[]`, `supplies[]`, `services[]` arrays (replaces old `staffing[]`/`supplies[]`/`programDescription`). Compliance is now 80% personnel (cert+classified, soft minimum) / 20% supplies+services (hard max). Generalized `PlanLineItems` to take a configurable `fields` array (text inputs + a hireType select for classified).
+- Section reminders: certificated (expand-not-supplant, hourly pay counts, elementary Arts Learning Leader $2,012/50hr stipend shown only for ES/preschool sites); classified (VAPA Assistants supervised by a credentialed teacher; explicit part-time/full-time/substitute type); services (PSA >$15k needs BOE approval, PD, field-trip fees + LA County venue examples). Admin plans table updated to show Students / Personnel / Supplies+Services / Total.
+
 ## 2026-05-20 (continued 5)
 - Added "Total, Combined Arts & Music in Schools Funds Available" hero strip between the school header divider and the year columns. Computed as FY24-25 cumulative remaining (FY2425_AVAILABLE_BALANCE) + FY25-26 remaining (allocation − totalExp). Figure centered in large serif type; label beneath in small caps. Negative total renders red. Year columns pushed down with increased top padding.
 
