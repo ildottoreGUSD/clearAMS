@@ -138,11 +138,11 @@ function AnimNum({ value, format=(v=>v), duration=420, className, style }) {
   return <span className={className} style={style}>{format(disp)}</span>;
 }
 
-// ── School data — sourced from "Allocation Updated 5-1-26 v3.xlsx" ────────────
+// ── School data — sourced from "Allocation Updated 5-19-26 v4.xlsx" ───────────
 const YEARS = [
   { key:"fy2627", label:"FY 2026–27", status:"upcoming" },
-  { key:"fy2526", label:"FY 2025–26", status:"current",  fileName:"Allocation Updated 5-1-26 v3.xlsx", importedOn:"May 1, 2026" },
-  { key:"fy2425", label:"FY 2024–25", status:"final",    fileName:"Allocation Updated 5-1-26 v3.xlsx", importedOn:"May 1, 2026" },
+  { key:"fy2526", label:"FY 2025–26", status:"current",  fileName:"Allocation Updated 5-19-26 v4.xlsx", importedOn:"May 19, 2026" },
+  { key:"fy2425", label:"FY 2024–25", status:"final",    fileName:"Allocation Updated 5-19-26 v4.xlsx", importedOn:"May 19, 2026" },
 ];
 
 const SCHOOLS = {
@@ -150,169 +150,169 @@ const SCHOOLS = {
     id:"hoover", name:"Hoover HS",
     fy2324: { allocation:217860.0, staffingBudget:174288.0, suppliesBudget:43572.0, totalExp:0.0 },
     fy2425: { allocation:228198.61, staffingBudget:182558.89, suppliesBudget:45639.72, totalExp:46931.62 },
-    fy2526: { allocation:267192.09, staffingBudget:213753.67, suppliesBudget:53438.42, totalExp:335135.21 },
+    fy2526: { allocation:267192.09, staffingBudget:213753.67, suppliesBudget:53438.42, totalExp:256643.64 },
   },
   crescenta: {
     id:"crescenta", name:"CVHS",
     fy2324: { allocation:318306.0, staffingBudget:254644.8, suppliesBudget:63661.2, totalExp:0.0 },
     fy2425: { allocation:315327.61, staffingBudget:252262.09, suppliesBudget:63065.52, totalExp:241069.79 },
-    fy2526: { allocation:394550.64, staffingBudget:315640.51, suppliesBudget:78910.13, totalExp:372720.37 },
+    fy2526: { allocation:394550.64, staffingBudget:315640.51, suppliesBudget:78910.13, totalExp:317936.8 },
   },
   glendale: {
     id:"glendale", name:"Glendale HS",
     fy2324: { allocation:313314.0, staffingBudget:250651.2, suppliesBudget:62662.8, totalExp:0.0 },
     fy2425: { allocation:314090.08, staffingBudget:251272.07, suppliesBudget:62818.02, totalExp:164693.34 },
-    fy2526: { allocation:348507.72, staffingBudget:278806.18, suppliesBudget:69701.54, totalExp:346731.24 },
+    fy2526: { allocation:348507.72, staffingBudget:278806.18, suppliesBudget:69701.54, totalExp:438355.85 },
   },
   clark: {
     id:"clark", name:"Clark HS",
     fy2324: { allocation:176969.0, staffingBudget:141575.2, suppliesBudget:35393.8, totalExp:0.0 },
     fy2425: { allocation:165837.05, staffingBudget:132669.64, suppliesBudget:33167.41, totalExp:12448.15 },
-    fy2526: { allocation:183837.06, staffingBudget:147069.65, suppliesBudget:36767.41, totalExp:66211.04 },
+    fy2526: { allocation:183837.06, staffingBudget:147069.65, suppliesBudget:36767.41, totalExp:92536.76 },
   },
   daily: {
     id:"daily", name:"Daily HS",
     fy2324: { allocation:18280.0, staffingBudget:14624.0, suppliesBudget:3656.0, totalExp:0.0 },
     fy2425: { allocation:17007.7, staffingBudget:13606.16, suppliesBudget:3401.54, totalExp:2262.75 },
-    fy2526: { allocation:12178.98, staffingBudget:9743.18, suppliesBudget:2435.8, totalExp:4406.13 },
+    fy2526: { allocation:12178.98, staffingBudget:9743.18, suppliesBudget:2435.8, totalExp:213.73 },
   },
   roosevelt: {
     id:"roosevelt", name:"Roosevelt MS",
     fy2324: { allocation:135974.0, staffingBudget:108779.2, suppliesBudget:27194.8, totalExp:0.0 },
     fy2425: { allocation:134679.24, staffingBudget:107743.39, suppliesBudget:26935.85, totalExp:112778.71 },
-    fy2526: { allocation:146697.21, staffingBudget:117357.77, suppliesBudget:29339.44, totalExp:162948.08 },
+    fy2526: { allocation:146697.21, staffingBudget:117357.77, suppliesBudget:29339.44, totalExp:92536.76 },
   },
   rosemont: {
     id:"rosemont", name:"Rosemont MS",
     fy2324: { allocation:164029.0, staffingBudget:131223.2, suppliesBudget:32805.8, totalExp:0.0 },
     fy2425: { allocation:151431.24, staffingBudget:121144.99, suppliesBudget:30286.25, totalExp:10556.2 },
-    fy2526: { allocation:189708.75, staffingBudget:151767.0, suppliesBudget:37941.75, totalExp:49288.26 },
+    fy2526: { allocation:189708.75, staffingBudget:151767.0, suppliesBudget:37941.75, totalExp:71042.95 },
   },
   toll: {
     id:"toll", name:"Toll MS",
     fy2324: { allocation:169195.0, staffingBudget:135356.0, suppliesBudget:33839.0, totalExp:0.0 },
     fy2425: { allocation:199652.68, staffingBudget:159722.15, suppliesBudget:39930.54, totalExp:24476.82 },
-    fy2526: { allocation:236822.85, staffingBudget:189458.28, suppliesBudget:47364.57, totalExp:122242.81 },
+    fy2526: { allocation:236822.85, staffingBudget:189458.28, suppliesBudget:47364.57, totalExp:119359.23 },
   },
   wilson: {
     id:"wilson", name:"Wilson MS",
     fy2324: { allocation:167929.0, staffingBudget:134343.2, suppliesBudget:33585.8, totalExp:0.0 },
     fy2425: { allocation:172887.63, staffingBudget:138310.11, suppliesBudget:34577.53, totalExp:123851.03 },
-    fy2526: { allocation:200975.94, staffingBudget:160780.75, suppliesBudget:40195.19, totalExp:77833.93 },
+    fy2526: { allocation:200975.94, staffingBudget:160780.75, suppliesBudget:40195.19, totalExp:81779.24 },
   },
   balboa: {
     id:"balboa", name:"Balboa ES",
     fy2324: { allocation:137119.0, staffingBudget:109695.2, suppliesBudget:27423.8, totalExp:0.0 },
     fy2425: { allocation:121153.38, staffingBudget:96922.71, suppliesBudget:24230.68, totalExp:154505.04 },
-    fy2526: { allocation:138248.55, staffingBudget:110598.84, suppliesBudget:27649.71, totalExp:21003.03 },
+    fy2526: { allocation:138248.55, staffingBudget:110598.84, suppliesBudget:27649.71, totalExp:24026.21 },
   },
   cerritos: {
     id:"cerritos", name:"Cerritos ES",
     fy2324: { allocation:82971.0, staffingBudget:66376.8, suppliesBudget:16594.2, totalExp:0.0 },
     fy2425: { allocation:81673.51, staffingBudget:65338.81, suppliesBudget:16334.7, totalExp:48469.31 },
-    fy2526: { allocation:89244.54, staffingBudget:71395.63, suppliesBudget:17848.91, totalExp:54246.79 },
+    fy2526: { allocation:89244.54, staffingBudget:71395.63, suppliesBudget:17848.91, totalExp:56257.58 },
   },
   columbus: {
     id:"columbus", name:"Columbus ES",
     fy2324: { allocation:76684.0, staffingBudget:61347.2, suppliesBudget:15336.8, totalExp:0.0 },
     fy2425: { allocation:79166.5, staffingBudget:63333.2, suppliesBudget:15833.3, totalExp:52905.15 },
-    fy2526: { allocation:86492.34, staffingBudget:69193.87, suppliesBudget:17298.47, totalExp:143124.74 },
+    fy2526: { allocation:86492.34, staffingBudget:69193.87, suppliesBudget:17298.47, totalExp:69928.07 },
   },
   dunsmore: {
     id:"dunsmore", name:"Dunsmore ES",
     fy2324: { allocation:70652.0, staffingBudget:56521.6, suppliesBudget:14130.4, totalExp:0.0 },
     fy2425: { allocation:71946.12, staffingBudget:57556.9, suppliesBudget:14389.22, totalExp:56320.46 },
-    fy2526: { allocation:91791.81, staffingBudget:73433.45, suppliesBudget:18358.36, totalExp:101038.28 },
+    fy2526: { allocation:91791.81, staffingBudget:73433.45, suppliesBudget:18358.36, totalExp:78627.79 },
   },
   edison: {
     id:"edison", name:"Edison ES",
     fy2324: { allocation:125292.0, staffingBudget:100233.6, suppliesBudget:25058.4, totalExp:0.0 },
     fy2425: { allocation:126773.68, staffingBudget:101418.94, suppliesBudget:25354.74, totalExp:121242.12 },
-    fy2526: { allocation:146956.59, staffingBudget:117565.27, suppliesBudget:29391.32, totalExp:36469.24 },
+    fy2526: { allocation:146956.59, staffingBudget:117565.27, suppliesBudget:29391.32, totalExp:40330.61 },
   },
   franklin: {
     id:"franklin", name:"Franklin ES",
     fy2324: { allocation:74346.0, staffingBudget:59476.8, suppliesBudget:14869.2, totalExp:0.0 },
     fy2425: { allocation:76977.12, staffingBudget:61581.69, suppliesBudget:15395.42, totalExp:25756.43 },
-    fy2526: { allocation:89554.41, staffingBudget:71643.53, suppliesBudget:17910.88, totalExp:103841.89 },
+    fy2526: { allocation:89554.41, staffingBudget:71643.53, suppliesBudget:17910.88, totalExp:61932.66 },
   },
   fremont: {
     id:"fremont", name:"Fremont ES",
     fy2324: { allocation:77087.0, staffingBudget:61669.6, suppliesBudget:15417.4, totalExp:0.0 },
     fy2425: { allocation:74148.49, staffingBudget:59318.79, suppliesBudget:14829.7, totalExp:79308.59 },
-    fy2526: { allocation:90193.95, staffingBudget:72155.16, suppliesBudget:18038.79, totalExp:51737.95 },
+    fy2526: { allocation:90193.95, staffingBudget:72155.16, suppliesBudget:18038.79, totalExp:46656.44 },
   },
   glenoaks: {
     id:"glenoaks", name:"Glenoaks ES",
     fy2324: { allocation:67480.0, staffingBudget:53984.0, suppliesBudget:13496.0, totalExp:0.0 },
     fy2425: { allocation:70437.92, staffingBudget:56350.34, suppliesBudget:14087.58, totalExp:74724.28 },
-    fy2526: { allocation:79632.63, staffingBudget:63706.1, suppliesBudget:15926.53, totalExp:94683.96 },
+    fy2526: { allocation:79632.63, staffingBudget:63706.1, suppliesBudget:15926.53, totalExp:92001.38 },
   },
   jefferson: {
     id:"jefferson", name:"Jefferson ES",
     fy2324: { allocation:123893.0, staffingBudget:99114.4, suppliesBudget:24778.6, totalExp:0.0 },
     fy2425: { allocation:130040.78, staffingBudget:104032.62, suppliesBudget:26008.16, totalExp:124217.16 },
-    fy2526: { allocation:142712.46, staffingBudget:114169.97, suppliesBudget:28542.49, totalExp:87067.86 },
+    fy2526: { allocation:142712.46, staffingBudget:114169.97, suppliesBudget:28542.49, totalExp:89468.08 },
   },
   keppel: {
     id:"keppel", name:"Keppel ES",
     fy2324: { allocation:129597.0, staffingBudget:103677.6, suppliesBudget:25919.4, totalExp:0.0 },
     fy2425: { allocation:134861.02, staffingBudget:107888.82, suppliesBudget:26972.2, totalExp:175850.73 },
-    fy2526: { allocation:156426.93, staffingBudget:125141.54, suppliesBudget:31285.39, totalExp:130291.06 },
+    fy2526: { allocation:156426.93, staffingBudget:125141.54, suppliesBudget:31285.39, totalExp:119817.06 },
   },
   lacrescenta: {
     id:"lacrescenta", name:"La Crescenta ES",
     fy2324: { allocation:55221.0, staffingBudget:44176.8, suppliesBudget:11044.2, totalExp:0.0 },
     fy2425: { allocation:55993.16, staffingBudget:44794.53, suppliesBudget:11198.63, totalExp:52684.28 },
-    fy2526: { allocation:65065.77, staffingBudget:52052.62, suppliesBudget:13013.15, totalExp:75252.81 },
+    fy2526: { allocation:65065.77, staffingBudget:52052.62, suppliesBudget:13013.15, totalExp:61242.26 },
   },
   lincoln: {
     id:"lincoln", name:"Lincoln ES",
     fy2324: { allocation:67070.0, staffingBudget:53656.0, suppliesBudget:13414.0, totalExp:0.0 },
     fy2425: { allocation:63546.15, staffingBudget:50836.92, suppliesBudget:12709.23, totalExp:39008.71 },
-    fy2526: { allocation:77742.72, staffingBudget:62194.18, suppliesBudget:15548.54, totalExp:18440.52 },
+    fy2526: { allocation:77742.72, staffingBudget:62194.18, suppliesBudget:15548.54, totalExp:12649.81 },
   },
   mann: {
     id:"mann", name:"Mann ES",
     fy2324: { allocation:103151.0, staffingBudget:82520.8, suppliesBudget:20630.2, totalExp:0.0 },
     fy2425: { allocation:106329.08, staffingBudget:85063.26, suppliesBudget:21265.82, totalExp:17883.86 },
-    fy2526: { allocation:117560.52, staffingBudget:94048.42, suppliesBudget:23512.1, totalExp:93428.12 },
+    fy2526: { allocation:117560.52, staffingBudget:94048.42, suppliesBudget:23512.1, totalExp:70637.13 },
   },
   marshall: {
     id:"marshall", name:"Marshall ES",
     fy2324: { allocation:78095.0, staffingBudget:62476.0, suppliesBudget:15619.0, totalExp:0.0 },
     fy2425: { allocation:73675.06, staffingBudget:58940.05, suppliesBudget:14735.01, totalExp:63336.16 },
-    fy2526: { allocation:86790.33, staffingBudget:69432.26, suppliesBudget:17358.07, totalExp:75650.15 },
+    fy2526: { allocation:86790.33, staffingBudget:69432.26, suppliesBudget:17358.07, totalExp:67867.5 },
   },
   montevista: {
     id:"montevista", name:"Monte Vista ES",
     fy2324: { allocation:84409.0, staffingBudget:67527.2, suppliesBudget:16881.8, totalExp:0.0 },
     fy2425: { allocation:84093.62, staffingBudget:67274.9, suppliesBudget:16818.72, totalExp:69223.71 },
-    fy2526: { allocation:107855.55, staffingBudget:86284.44, suppliesBudget:21571.11, totalExp:103925.82 },
+    fy2526: { allocation:107855.55, staffingBudget:86284.44, suppliesBudget:21571.11, totalExp:63820.52 },
   },
   mountainave: {
     id:"mountainave", name:"Mountain Ave ES",
     fy2324: { allocation:69095.0, staffingBudget:55276.0, suppliesBudget:13819.0, totalExp:0.0 },
     fy2425: { allocation:70103.32, staffingBudget:56082.66, suppliesBudget:14020.66, totalExp:40959.0 },
-    fy2526: { allocation:83878.74, staffingBudget:67102.99, suppliesBudget:16775.75, totalExp:47936.97 },
+    fy2526: { allocation:83878.74, staffingBudget:67102.99, suppliesBudget:16775.75, totalExp:43239.39 },
   },
   muir: {
     id:"muir", name:"Muir ES",
     fy2324: { allocation:121619.0, staffingBudget:97295.2, suppliesBudget:24323.8, totalExp:0.0 },
     fy2425: { allocation:128631.46, staffingBudget:102905.17, suppliesBudget:25726.29, totalExp:47548.44 },
-    fy2526: { allocation:143845.02, staffingBudget:115076.02, suppliesBudget:28769.0, totalExp:182633.75 },
+    fy2526: { allocation:143845.02, staffingBudget:115076.02, suppliesBudget:28769.0, totalExp:150627.92 },
   },
   valleyview: {
     id:"valleyview", name:"Valley View ES",
     fy2324: { allocation:57338.0, staffingBudget:45870.4, suppliesBudget:11467.6, totalExp:0.0 },
     fy2425: { allocation:56698.32, staffingBudget:45358.66, suppliesBudget:11339.66, totalExp:62436.66 },
-    fy2526: { allocation:71733.42, staffingBudget:57386.74, suppliesBudget:14346.68, totalExp:49082.31 },
+    fy2526: { allocation:71733.42, staffingBudget:57386.74, suppliesBudget:14346.68, totalExp:37365.48 },
   },
   verdugowoodlands: {
     id:"verdugowoodlands", name:"Verdugo Woodlands ES",
     fy2324: { allocation:82961.0, staffingBudget:66368.8, suppliesBudget:16592.2, totalExp:0.0 },
     fy2425: { allocation:85070.46, staffingBudget:68056.36, suppliesBudget:17014.09, totalExp:44765.94 },
-    fy2526: { allocation:106440.84, staffingBudget:85152.67, suppliesBudget:21288.17, totalExp:31980.23 },
+    fy2526: { allocation:106440.84, staffingBudget:85152.67, suppliesBudget:21288.17, totalExp:23782.78 },
   },
   rdwhite: {
     id:"rdwhite", name:"R.D. White ES",
@@ -324,13 +324,13 @@ const SCHOOLS = {
     id:"cloud", name:"Cloud Preschool",
     fy2324: { allocation:12758.0, staffingBudget:10206.4, suppliesBudget:2551.6, totalExp:0.0 },
     fy2425: { allocation:12224.41, staffingBudget:9779.53, suppliesBudget:2444.88, totalExp:0.0 },
-    fy2526: { allocation:6958.71, staffingBudget:5566.97, suppliesBudget:1391.74, totalExp:20094.56 },
+    fy2526: { allocation:6958.71, staffingBudget:5566.97, suppliesBudget:1391.74, totalExp:22807.23 },
   },
   verdugoacademy: {
     id:"verdugoacademy", name:"Verdugo Academy",
     fy2324: { allocation:32987.0, staffingBudget:26389.6, suppliesBudget:6597.4, totalExp:0.0 },
     fy2425: { allocation:25581.46, staffingBudget:20465.17, suppliesBudget:5116.29, totalExp:0.0 },
-    fy2526: { allocation:22586.85, staffingBudget:18069.48, suppliesBudget:4517.37, totalExp:23944.0 },
+    fy2526: { allocation:22586.85, staffingBudget:18069.48, suppliesBudget:4517.37, totalExp:25992.81 },
   },
   jewelcity: {
     id:"jewelcity", name:"Jewel City",
@@ -342,50 +342,89 @@ const SCHOOLS = {
     id:"pacificave", name:"Pacific Avenue Education Center",
     fy2324: { allocation:7340.0, staffingBudget:5872.0, suppliesBudget:1468.0, totalExp:0.0 },
     fy2425: { allocation:7032.61, staffingBudget:5626.08, suppliesBudget:1406.52, totalExp:0.0 },
-    fy2526: { allocation:6422.13, staffingBudget:5137.7, suppliesBudget:1284.43, totalExp:15117.0 },
+    fy2526: { allocation:6422.13, staffingBudget:5137.7, suppliesBudget:1284.43, totalExp:15117.01 },
   },
 };
-const DATA_DATE    = "May 1, 2026";
+const DATA_DATE    = "May 19, 2026";
 const SCHOOL_LIST  = Object.values(SCHOOLS);
 
 // ── FY 2024–25 "Available Balance After A/V Projects" (Allocation spreadsheet col U) ──
 // Drives the "Remaining" figure on the FY 2024–25 card so it reflects funds the school
 // still actually has (Total Balance minus Studio Spectrum A/V quote), instead of the
 // naive allocation − expenditure of the single fiscal year in isolation.
+// FY24-25 available (col T) + FY25-26 balance (col P) = combined carryover pool.
+// Negative values (Cloud Preschool, Pacific Ave) indicate a true deficit applied to FY26-27.
 const FY2425_AVAILABLE_BALANCE = {
-  hoover:           157989.81,
-  crescenta:        331324.17,
-  glendale:         415308.17,
-  clark:            386298.35,
-  daily:             40652.45,
-  roosevelt:         64575.60,
-  rosemont:         445324.53,
-  toll:             428699.70,
-  wilson:           340107.61,
-  balboa:           196272.82,
-  cerritos:         147029.66,
-  columbus:         -39290.28,
-  dunsmore:          39733.36,
-  edison:           241310.91,
-  franklin:          57194.44,
-  fremont:           87531.86,
-  glenoaks:          31185.30,
-  jefferson:        155520.20,
-  keppel:           103586.96,
-  lacrescenta:       25879.88,
-  lincoln:          143190.63,
-  mann:             123178.92,
-  marshall:          49117.59,
-  montevista:        49629.10,
-  mountainave:       74990.90,
-  muir:             100222.11,
-  valleyview:        61895.13,
-  verdugowoodlands: 166382.27,
-  rdwhite:          464271.44,
-  cloud:             11846.56,
-  verdugoacademy:    57211.31,
-  jewelcity:          3207.36,
-  pacificave:         5677.74,
+  hoover:            247029.83,
+  crescenta:         462721.58,
+  glendale:          233835.43,
+  clark:             451272.93,
+  daily:              52831.43,
+  roosevelt:         189147.37,
+  rosemont:          542235.64,
+  toll:              549046.90,
+  wilson:            455359.00,
+  balboa:            307471.98,
+  cerritos:          178005.83,
+  columbus:           50470.66,
+  dunsmore:           75307.87,
+  edison:            344075.52,
+  franklin:          126725.42,
+  fremont:           136150.88,
+  glenoaks:           21499.13,
+  jefferson:         206364.36,
+  keppel:            150670.83,
+  lacrescenta:        43713.94,
+  lincoln:           214074.25,
+  mann:              192893.30,
+  marshall:           75823.07,
+  montevista:        133769.43,
+  mountainave:       120327.83,
+  muir:              125445.04,
+  valleyview:        107979.90,
+  verdugowoodlands:  257237.78,
+  rdwhite:           630074.66,
+  cloud:              -6714.63,
+  verdugoacademy:     51756.54,
+  jewelcity:           4813.14,
+  pacificave:         -3017.15,
+};
+
+// FY25-26 balance (col P = allocation − expenditures). Negative = overspent in 25-26.
+const FY2526_BALANCE = {
+  hoover:             10548.45,
+  crescenta:          76613.84,
+  glendale:          -89848.13,
+  clark:              91300.30,
+  daily:              12178.98,
+  roosevelt:          54160.45,
+  rosemont:          118665.80,
+  toll:              117463.62,
+  wilson:            119196.70,
+  balboa:            114222.34,
+  cerritos:           32986.96,
+  columbus:           16564.27,
+  dunsmore:           13164.02,
+  edison:            106625.98,
+  franklin:           27621.75,
+  fremont:            43537.51,
+  glenoaks:          -12368.75,
+  jefferson:          53244.38,
+  keppel:             36609.87,
+  lacrescenta:         3823.51,
+  lincoln:            65092.91,
+  mann:               46923.39,
+  marshall:           18922.83,
+  montevista:         44035.03,
+  mountainave:        40639.35,
+  muir:               -6782.90,
+  valleyview:         34367.94,
+  verdugowoodlands:   82658.06,
+  rdwhite:           165803.22,
+  cloud:             -15848.52,
+  verdugoacademy:     -3405.96,
+  jewelcity:           1605.78,
+  pacificave:         -8694.88,
 };
 
 
@@ -617,7 +656,7 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0, planStatus=null, 
               <div style={{ fontSize:11, color:"#94A3B8", marginBottom:12, lineHeight:1.5 }}>
                 {planStatus === "draft"
                   ? "You have a draft in progress. Continue editing before the September 15 deadline."
-                  : "Due September 15, 2026. Start your plan now to meet the compliance deadline."}
+                  : "Due September 15, 2026. Start your plan now to meet the compliance deadline. A compliant, SSC-approved plan is required before any FY 2026–27 expenditures will be processed."}
               </div>
               <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
                 <button onClick={onOpenPlan} style={{
@@ -641,9 +680,15 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0, planStatus=null, 
   }
   const planFile = (SITE_PLANS[school.id] || {})[key];
   const planUrl  = planFile ? `/plans/${encodeURIComponent(planFile)}` : null;
-  const fy2425balance = FY2425_AVAILABLE_BALANCE[school.id];
+  const fy2425balance  = FY2425_AVAILABLE_BALANCE[school.id];
+  const fy2526balance  = FY2526_BALANCE[school.id];
+  // Badge on FY25-26 card when that year drew from the 24-25 carryover pool
   const priorYearOverage = (key === "fy2526" && typeof fy2425balance === "number" && fy2425balance < 0)
     ? Math.abs(fy2425balance) : null;
+  // Badge on FY24-25 card when the combined pool was reduced by 25-26 overspend
+  const fy2526draw = (key === "fy2425" && typeof fy2526balance === "number" && fy2526balance < 0)
+    ? Math.abs(fy2526balance) : null;
+  const isDeficit  = (key === "fy2425" && typeof fy2425balance === "number" && fy2425balance < 0);
   const data       = school[key];
   const isCurrent  = status === "current";
   const { allocation, totalExp } = data;
@@ -705,21 +750,6 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0, planStatus=null, 
       <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:20 }}>
         <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
           <div style={{ fontSize:17, fontWeight:700, color:"var(--ink)", letterSpacing:"-.02em" }}>{label}</div>
-          {planUrl && (
-            <a href={planUrl} target="_blank" rel="noreferrer" style={{
-              fontSize:10, fontWeight:700, letterSpacing:".04em", color:"#1D4ED8",
-              textDecoration:"underline", textDecorationColor:"#93C5FD"
-            }}>📄 Site Expenditure Plan</a>
-          )}
-          {key === "fy2526" && (
-            <button onClick={onOpenPlan} style={{
-              fontSize:10, fontWeight:700, color: planStatus === "submitted" ? "var(--green)" : "#1D4ED8",
-              background:"none", border:"none", cursor:"pointer", padding:0,
-              textDecoration:"underline", textDecorationColor:"#93C5FD"
-            }}>
-              {planStatus === "submitted" ? "✓ Plan submitted" : planStatus === "draft" ? "✏ Draft in progress" : "📋 Create 25-26 plan"}
-            </button>
-          )}
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:6, borderRadius:999, padding:"5px 12px",
           background:sc.bg, fontSize:10.5, fontWeight:600, color:sc.text, flexShrink:0 }}>
@@ -756,7 +786,11 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0, planStatus=null, 
             </div>
           </div>
           <div style={{ padding:"18px 20px", borderLeft:"1px solid var(--line)" }}>
-            <div className="eyebrow" style={{ marginBottom:7 }}>{remaining >= 0 ? "Remaining" : "Over"}</div>
+            <div className="eyebrow" style={{ marginBottom:7 }}>
+              {key === "fy2425"
+                ? (remaining >= 0 ? "Cumulative Remaining" : "Cumulative Deficit")
+                : (remaining >= 0 ? "Remaining" : "Over")}
+            </div>
             <div className="mono" style={{ fontSize:18, fontWeight:700, lineHeight:1,
               color: remainingColor }}>
               {remaining >= 0 ? "" : "−"}<AnimNum value={Math.abs(remaining)} format={fmt$} />
@@ -778,6 +812,20 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0, planStatus=null, 
                 border:"1px solid #FDE68A", borderRadius:99,
                 padding:"3px 8px", cursor:"pointer"
               }}>⚠ Prior Year Overage</button>
+            )}
+            {fy2526draw !== null && (
+              <div style={{ marginTop:8, fontSize:10, color:"#92400E",
+                fontWeight:600, lineHeight:1.4 }}>
+                ↓ {fmt$(fy2526draw)} drawn from this pool by FY25-26 overspend
+              </div>
+            )}
+            {isDeficit && (
+              <div style={{ marginTop:8, fontSize:10, fontWeight:700, letterSpacing:".04em",
+                color:"#7F1D1D", background:"#FEE2E2",
+                border:"1px solid #FECACA", borderRadius:99,
+                padding:"3px 8px", display:"inline-block" }}>
+                ⚠ Deficit — applied to FY26-27
+              </div>
             )}
           </div>
         </div>

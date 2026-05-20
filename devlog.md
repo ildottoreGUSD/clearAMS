@@ -1,5 +1,11 @@
 # Dev Log
 
+## 2026-05-20 (continued 3)
+- Imported allocation data from "Allocation Updated 5-19-26 v4.xlsx" (active as of May 19, 2026). Updated `DATA_DATE`, YEARS metadata, `fy2526.totalExp` for all 33 schools, and `FY2425_AVAILABLE_BALANCE`.
+- Combined carryover pool: `FY2425_AVAILABLE_BALANCE` now equals col T (FY24-25 available after A/V) + col P (FY25-26 balance), reflecting the true cumulative pool available for FY26-27. Added `FY2526_BALANCE` constant (col P per school) to drive notes. FY24-25 "Remaining" label updated to "Cumulative Remaining" / "Cumulative Deficit". Schools where FY25-26 drew from the carryover (Glendale, Glenoaks, Muir, Verdugo Academy) show an explanatory note; Cloud Preschool and Pacific Ave show a red "⚠ Deficit — applied to FY26-27" badge (combined pool is negative). Columbus FY24-25 overage badge auto-removed (balance flipped positive).
+- Plan builder cleanup: removed "📋 Create 25-26 plan" button and "📄 Site Expenditure Plan" link from FY25-26 column header (principals have already submitted their 25-26 plans). Plan builder lives exclusively in the FY26-27 upcoming column.
+- Added compliance notice to FY26-27 plan card: "A compliant, SSC-approved plan is required before any FY 2026–27 expenditures will be processed."
+
 ## 2026-05-20 (continued 2)
 - Built in-app Site Expenditure Plan builder. Server: `plans.json` on the `/data` volume; endpoints `GET/POST /api/plan/<school>/<year>`, `POST /api/plan/<school>/<year>/submit`, `GET /admin/api/plans` (admin). Plans keyed by `schoolId_fiscalYear`, status `draft` or `submitted` (locked on submit).
 - Dashboard: `PlanEditor` React view (full-page, accessible via router). Allocation bar with live 80/20 compliance tracking (staffing ≤ 80%, supplies ≤ 20%); Submit button disabled while over limits. Upcoming FY 2026-27 column shows "Create Plan →" / "Continue Draft →" / "View submitted plan" based on status; FY 2025-26 column shows inline plan status link. Print button hides toolbar/action bar for clean printout.
