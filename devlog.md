@@ -1,5 +1,8 @@
 # Dev Log
 
+## 2026-05-20 (continued)
+- Configured Resend for transactional email (free tier, 100/day). Verified gusddev.app domain in Resend via Cloudflare DNS (DKIM TXT, SPF MX+TXT, DMARC TXT). Set SMTP secrets on Fly.io (smtp.resend.com:587, user=resend, from=noreply@gusddev.app). Welcome email toggle now active in admin panel.
+
 ## 2026-05-20
 - Migrated from Railway (outage on deploy day) to Fly.io. Created Dockerfile (multi-stage: Node 20 builds Remotion player via `npm run build:player`, Python 3.12-slim runs Flask/gunicorn), fly.toml (lax region, shared-cpu-1x 256MB, always-on `auto_stop=off min_machines=1`), .dockerignore, docker-entrypoint.sh.
 - Added 1 GB encrypted Fly.io volume (`clearams_data`) mounted at `/data`; `users.json` is seeded there on first boot from the bundled copy. Added `DATA_DIR` env var to server.py so path is configurable (defaults to app dir in local dev, `/data` on Fly).
