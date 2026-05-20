@@ -1450,7 +1450,26 @@ function Dashboard({ schoolId, schoolIds, onSchoolChange, user, onSignOut, onOpe
 
       <div style={{ borderTop:"1px solid var(--line)" }} />
 
-      <div className="mx-auto px-10 py-10" style={{ maxWidth:CONTAINER }}>
+      {/* Total available hero */}
+      {(() => {
+        const fy2425rem = FY2425_AVAILABLE_BALANCE[school.id] ?? 0;
+        const fy2526rem = (school.fy2526?.allocation ?? 0) - (school.fy2526?.totalExp ?? 0);
+        const totalAvail = fy2425rem + fy2526rem;
+        const isNeg = totalAvail < 0;
+        return (
+          <div style={{ background:"#F0F9FF", borderBottom:"1px solid #BAE6FD", padding:"28px 40px", textAlign:"center" }}>
+            <div className="serif" style={{ fontSize:42, fontWeight:700, letterSpacing:"-.02em",
+              color: isNeg ? "var(--red)" : "var(--ink)" }}>
+              {isNeg ? "−" : ""}{fmt$(Math.abs(totalAvail))}
+            </div>
+            <div style={{ fontSize:11, fontWeight:700, letterSpacing:".08em", textTransform:"uppercase", color:"#0369A1", marginTop:6 }}>
+              Total, Combined Arts &amp; Music in Schools Funds Available
+            </div>
+          </div>
+        );
+      })()}
+
+      <div className="mx-auto px-10 pt-10 pb-10" style={{ maxWidth:CONTAINER }}>
         <div className="flex" style={{ gap:GAP }}>
           {YEARS.map((yr, i) => (
             <YearColumn key={yr.key} yearMeta={yr} school={school}

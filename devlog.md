@@ -1,5 +1,8 @@
 # Dev Log
 
+## 2026-05-20 (continued 5)
+- Added "Total, Combined Arts & Music in Schools Funds Available" hero strip between the school header divider and the year columns. Computed as FY24-25 cumulative remaining (FY2425_AVAILABLE_BALANCE) + FY25-26 remaining (allocation − totalExp). Figure centered in large serif type; label beneath in small caps. Negative total renders red. Year columns pushed down with increased top padding.
+
 ## 2026-05-20 (continued 4)
 - Added projected allocation to FY 2026–27 upcoming column: displays `Math.floor(fy2526.allocation / 10) * 10` (FY25-26 allocation floored to nearest $10) with a note that official CDE amounts publish July 2026. Replaces the plain "Allocations Expected July 2026" banner.
 - Updated FY 2026–27 plan card disclaimer: added "A compliant, SSC-approved plan is required before any FY 2026–27 expenditures will be processed."
