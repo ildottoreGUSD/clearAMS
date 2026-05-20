@@ -1,5 +1,10 @@
 # Dev Log
 
+## 2026-05-20 (continued 4)
+- Added projected allocation to FY 2026–27 upcoming column: displays `Math.floor(fy2526.allocation / 10) * 10` (FY25-26 allocation floored to nearest $10) with a note that official CDE amounts publish July 2026. Replaces the plain "Allocations Expected July 2026" banner.
+- Updated FY 2026–27 plan card disclaimer: added "A compliant, SSC-approved plan is required before any FY 2026–27 expenditures will be processed."
+- Changed "approved" → "processed" in the Planning Dates panel warning ("No expenditures will be processed without an approved, compliant plan on record").
+
 ## 2026-05-20 (continued 3)
 - Imported allocation data from "Allocation Updated 5-19-26 v4.xlsx" (active as of May 19, 2026). Updated `DATA_DATE`, YEARS metadata, `fy2526.totalExp` for all 33 schools, and `FY2425_AVAILABLE_BALANCE`.
 - Combined carryover pool: `FY2425_AVAILABLE_BALANCE` now equals col T (FY24-25 available after A/V) + col P (FY25-26 balance), reflecting the true cumulative pool available for FY26-27. Added `FY2526_BALANCE` constant (col P per school) to drive notes. FY24-25 "Remaining" label updated to "Cumulative Remaining" / "Cumulative Deficit". Schools where FY25-26 drew from the carryover (Glendale, Glenoaks, Muir, Verdugo Academy) show an explanatory note; Cloud Preschool and Pacific Ave show a red "⚠ Deficit — applied to FY26-27" badge (combined pool is negative). Columbus FY24-25 overage badge auto-removed (balance flipped positive).

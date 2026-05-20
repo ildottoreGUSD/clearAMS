@@ -621,15 +621,22 @@ function YearColumn({ yearMeta, school, colWidth, animDelay=0, planStatus=null, 
         </div>
 
         {/* Allocations expected banner */}
-        <div className="card" style={{ padding:"32px 24px", marginBottom:14, textAlign:"center",
-          background:"#F8FAFC", borderStyle:"dashed" }}>
-          <div style={{ fontSize:10, fontWeight:700, letterSpacing:".08em", textTransform:"uppercase",
-            color:"#94A3B8", marginBottom:10 }}>Allocations Expected</div>
-          <div style={{ fontSize:28, fontWeight:700, color:"#CBD5E1", letterSpacing:"-.02em" }}>July 2026</div>
-          <div style={{ fontSize:11, color:"#94A3B8", marginTop:8, lineHeight:1.5 }}>
-            Prop 28 funding amounts for FY 2026–27<br/>will be published by CDE in July.
-          </div>
-        </div>
+        {(() => {
+          const projectedAlloc = Math.floor((school.fy2526?.allocation ?? 0) / 10) * 10;
+          return (
+            <div className="card" style={{ padding:"28px 24px", marginBottom:14, textAlign:"center",
+              background:"#F8FAFC", borderStyle:"dashed" }}>
+              <div style={{ fontSize:10, fontWeight:700, letterSpacing:".08em", textTransform:"uppercase",
+                color:"#94A3B8", marginBottom:10 }}>Projected Allocation</div>
+              <div className="serif" style={{ fontSize:32, fontWeight:700, color:"#CBD5E1", letterSpacing:"-.02em" }}>
+                {projectedAlloc > 0 ? fmt$(projectedAlloc) : "—"}
+              </div>
+              <div style={{ fontSize:10, color:"#94A3B8", marginTop:8, lineHeight:1.5 }}>
+                Estimated from FY 2025–26. Official amounts<br/>published by CDE in July 2026.
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Plan builder card */}
         <div className="card" style={{ padding:"18px 20px", background:"#F8FAFC", borderStyle:"dashed" }}>
@@ -1483,7 +1490,7 @@ function Dashboard({ schoolId, schoolIds, onSchoolChange, user, onSignOut, onOpe
               <div>
                 <div style={{ fontSize:12, fontWeight:700, color:"var(--amber)" }}>Required for spending</div>
                 <div style={{ fontSize:11, color:"var(--muted)", marginTop:2, maxWidth:260, lineHeight:1.5 }}>
-                  No expenditures will be approved without an approved, compliant plan on record.
+                  No expenditures will be processed without an approved, compliant plan on record.
                 </div>
               </div>
             </div>
